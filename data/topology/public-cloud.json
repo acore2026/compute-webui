@@ -1,0 +1,3408 @@
+{
+  "topology": {
+    "nodes": [
+      {
+        "id": "region-default-1",
+        "type": "region",
+        "dimensions": {
+          "width": 680,
+          "height": 480
+        },
+        "computedPosition": {
+          "x": 80,
+          "y": 0,
+          "z": 0
+        },
+        "handleBounds": {
+          "source": null,
+          "target": null
+        },
+        "selected": false,
+        "dragging": false,
+        "resizing": false,
+        "initialized": false,
+        "isParent": false,
+        "position": {
+          "x": 80,
+          "y": 0
+        },
+        "data": {
+          "label": "中国移动（CN）",
+          "variant": "access",
+          "pattern": "dots"
+        },
+        "events": {},
+        "style": {
+          "width": "680px",
+          "height": "480px"
+        },
+        "zIndex": 0
+      },
+      {
+        "id": "glass",
+        "type": "mission",
+        "dimensions": {
+          "width": 140,
+          "height": 64
+        },
+        "computedPosition": {
+          "x": 340,
+          "y": 580,
+          "z": 10
+        },
+        "handleBounds": {
+          "source": [
+            {
+              "id": "out-bottom",
+              "type": "source",
+              "nodeId": "glass",
+              "position": "bottom",
+              "x": 64,
+              "y": 57,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "out-right",
+              "type": "source",
+              "nodeId": "glass",
+              "position": "right",
+              "x": 133,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ],
+          "target": [
+            {
+              "id": "in-top",
+              "type": "target",
+              "nodeId": "glass",
+              "position": "top",
+              "x": 64,
+              "y": -5,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "in-left",
+              "type": "target",
+              "nodeId": "glass",
+              "position": "left",
+              "x": -5,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ]
+        },
+        "selected": false,
+        "dragging": false,
+        "resizing": false,
+        "initialized": false,
+        "isParent": false,
+        "position": {
+          "x": 340,
+          "y": 580
+        },
+        "data": {
+          "label": "AR 眼镜",
+          "role": "",
+          "kind": "glasses",
+          "handles": [
+            "in-top",
+            "out-bottom",
+            "in-left",
+            "out-right"
+          ],
+          "active": false,
+          "flashActive": false
+        },
+        "events": {},
+        "style": {
+          "width": "140px"
+        },
+        "zIndex": 10
+      },
+      {
+        "id": "idm-1",
+        "type": "mission",
+        "dimensions": {
+          "width": 140,
+          "height": 64
+        },
+        "computedPosition": {
+          "x": 120,
+          "y": 60,
+          "z": 10
+        },
+        "handleBounds": {
+          "source": [
+            {
+              "id": "out-bottom",
+              "type": "source",
+              "nodeId": "idm-1",
+              "position": "bottom",
+              "x": 64,
+              "y": 57,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "out-right",
+              "type": "source",
+              "nodeId": "idm-1",
+              "position": "right",
+              "x": 133,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ],
+          "target": [
+            {
+              "id": "in-top",
+              "type": "target",
+              "nodeId": "idm-1",
+              "position": "top",
+              "x": 64,
+              "y": -5,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "in-left",
+              "type": "target",
+              "nodeId": "idm-1",
+              "position": "left",
+              "x": -5,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ]
+        },
+        "selected": false,
+        "dragging": false,
+        "resizing": false,
+        "initialized": false,
+        "isParent": false,
+        "position": {
+          "x": 120,
+          "y": 60
+        },
+        "data": {
+          "label": "身份管理IDM",
+          "role": "",
+          "kind": "idm",
+          "handles": [
+            "in-top",
+            "out-bottom",
+            "in-left",
+            "out-right"
+          ],
+          "active": false,
+          "flashActive": false
+        },
+        "events": {},
+        "style": {
+          "width": "140px"
+        },
+        "zIndex": 10
+      },
+      {
+        "id": "signaling-1",
+        "type": "mission",
+        "dimensions": {
+          "width": 140,
+          "height": 64
+        },
+        "computedPosition": {
+          "x": 120,
+          "y": 220,
+          "z": 10
+        },
+        "handleBounds": {
+          "source": [
+            {
+              "id": "out-bottom",
+              "type": "source",
+              "nodeId": "signaling-1",
+              "position": "bottom",
+              "x": 64,
+              "y": 57,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "out-right",
+              "type": "source",
+              "nodeId": "signaling-1",
+              "position": "right",
+              "x": 133,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ],
+          "target": [
+            {
+              "id": "in-top",
+              "type": "target",
+              "nodeId": "signaling-1",
+              "position": "top",
+              "x": 64,
+              "y": -5,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "in-left",
+              "type": "target",
+              "nodeId": "signaling-1",
+              "position": "left",
+              "x": -5,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ]
+        },
+        "selected": false,
+        "dragging": false,
+        "resizing": false,
+        "initialized": false,
+        "isParent": false,
+        "position": {
+          "x": 120,
+          "y": 220
+        },
+        "data": {
+          "label": "信令路由SRF",
+          "role": "",
+          "kind": "signaling",
+          "handles": [
+            "in-top",
+            "out-bottom",
+            "in-left",
+            "out-right"
+          ],
+          "active": false,
+          "flashActive": false
+        },
+        "events": {},
+        "style": {
+          "width": "140px"
+        },
+        "zIndex": 10
+      },
+      {
+        "id": "acn_agent-1",
+        "type": "mission",
+        "dimensions": {
+          "width": 140,
+          "height": 64
+        },
+        "computedPosition": {
+          "x": 520,
+          "y": 120,
+          "z": 10
+        },
+        "handleBounds": {
+          "source": [
+            {
+              "id": "out-bottom",
+              "type": "source",
+              "nodeId": "acn_agent-1",
+              "position": "bottom",
+              "x": 64,
+              "y": 57,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "out-right",
+              "type": "source",
+              "nodeId": "acn_agent-1",
+              "position": "right",
+              "x": 133,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ],
+          "target": [
+            {
+              "id": "in-top",
+              "type": "target",
+              "nodeId": "acn_agent-1",
+              "position": "top",
+              "x": 64,
+              "y": -5,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "in-left",
+              "type": "target",
+              "nodeId": "acn_agent-1",
+              "position": "left",
+              "x": -5,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ]
+        },
+        "selected": false,
+        "dragging": false,
+        "resizing": false,
+        "initialized": false,
+        "isParent": false,
+        "position": {
+          "x": 520,
+          "y": 120
+        },
+        "data": {
+          "label": "ACN 智能体",
+          "role": "",
+          "kind": "acn_agent",
+          "handles": [
+            "in-top",
+            "out-bottom",
+            "in-left",
+            "out-right"
+          ],
+          "active": false,
+          "flashActive": false
+        },
+        "events": {},
+        "style": {
+          "width": "140px"
+        },
+        "zIndex": 10
+      },
+      {
+        "id": "sys_agent-1",
+        "type": "mission",
+        "dimensions": {
+          "width": 140,
+          "height": 64
+        },
+        "computedPosition": {
+          "x": 340,
+          "y": 200,
+          "z": 10
+        },
+        "handleBounds": {
+          "source": [
+            {
+              "id": "out-bottom",
+              "type": "source",
+              "nodeId": "sys_agent-1",
+              "position": "bottom",
+              "x": 64,
+              "y": 57,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "out-right",
+              "type": "source",
+              "nodeId": "sys_agent-1",
+              "position": "right",
+              "x": 133,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ],
+          "target": [
+            {
+              "id": "in-top",
+              "type": "target",
+              "nodeId": "sys_agent-1",
+              "position": "top",
+              "x": 64,
+              "y": -5,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "in-left",
+              "type": "target",
+              "nodeId": "sys_agent-1",
+              "position": "left",
+              "x": -5,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ]
+        },
+        "selected": false,
+        "dragging": false,
+        "resizing": false,
+        "initialized": false,
+        "isParent": false,
+        "position": {
+          "x": 340,
+          "y": 200
+        },
+        "data": {
+          "label": "SYS 智能体",
+          "role": "",
+          "kind": "sys_agent",
+          "handles": [
+            "in-top",
+            "out-bottom",
+            "in-left",
+            "out-right"
+          ],
+          "active": false,
+          "flashActive": false
+        },
+        "events": {},
+        "style": {
+          "width": "140px"
+        },
+        "zIndex": 10
+      },
+      {
+        "id": "connect_agent-1",
+        "type": "mission",
+        "dimensions": {
+          "width": 140,
+          "height": 64
+        },
+        "computedPosition": {
+          "x": 520,
+          "y": 280,
+          "z": 10
+        },
+        "handleBounds": {
+          "source": [
+            {
+              "id": "out-bottom",
+              "type": "source",
+              "nodeId": "connect_agent-1",
+              "position": "bottom",
+              "x": 64,
+              "y": 57,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "out-right",
+              "type": "source",
+              "nodeId": "connect_agent-1",
+              "position": "right",
+              "x": 133,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ],
+          "target": [
+            {
+              "id": "in-top",
+              "type": "target",
+              "nodeId": "connect_agent-1",
+              "position": "top",
+              "x": 64,
+              "y": -5,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "in-left",
+              "type": "target",
+              "nodeId": "connect_agent-1",
+              "position": "left",
+              "x": -5,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ]
+        },
+        "selected": false,
+        "dragging": false,
+        "resizing": false,
+        "initialized": false,
+        "isParent": false,
+        "position": {
+          "x": 520,
+          "y": 280
+        },
+        "data": {
+          "label": "连接智能体",
+          "role": "",
+          "kind": "connect_agent",
+          "handles": [
+            "in-top",
+            "out-bottom",
+            "in-left",
+            "out-right"
+          ],
+          "active": false,
+          "flashActive": false
+        },
+        "events": {},
+        "style": {
+          "width": "140px"
+        },
+        "zIndex": 10
+      },
+      {
+        "id": "base_station-1",
+        "type": "mission",
+        "dimensions": {
+          "width": 140,
+          "height": 64
+        },
+        "computedPosition": {
+          "x": 120,
+          "y": 520,
+          "z": 10
+        },
+        "handleBounds": {
+          "source": [
+            {
+              "id": "out-bottom",
+              "type": "source",
+              "nodeId": "base_station-1",
+              "position": "bottom",
+              "x": 64,
+              "y": 57,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "out-right",
+              "type": "source",
+              "nodeId": "base_station-1",
+              "position": "right",
+              "x": 133,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ],
+          "target": [
+            {
+              "id": "in-top",
+              "type": "target",
+              "nodeId": "base_station-1",
+              "position": "top",
+              "x": 64,
+              "y": -5,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "in-left",
+              "type": "target",
+              "nodeId": "base_station-1",
+              "position": "left",
+              "x": -5,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ]
+        },
+        "selected": false,
+        "dragging": false,
+        "resizing": false,
+        "initialized": false,
+        "isParent": false,
+        "position": {
+          "x": 120,
+          "y": 520
+        },
+        "data": {
+          "label": "无线基站RAN",
+          "role": "",
+          "kind": "base_station",
+          "handles": [
+            "in-top",
+            "out-bottom",
+            "in-left",
+            "out-right"
+          ],
+          "active": false,
+          "flashActive": false
+        },
+        "events": {},
+        "style": {
+          "width": "140px"
+        },
+        "zIndex": 10
+      },
+      {
+        "id": "robot-1",
+        "type": "mission",
+        "dimensions": {
+          "width": 140,
+          "height": 64
+        },
+        "computedPosition": {
+          "x": 520,
+          "y": 520,
+          "z": 10
+        },
+        "handleBounds": {
+          "source": [
+            {
+              "id": "out-bottom",
+              "type": "source",
+              "nodeId": "robot-1",
+              "position": "bottom",
+              "x": 64,
+              "y": 57,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "out-right",
+              "type": "source",
+              "nodeId": "robot-1",
+              "position": "right",
+              "x": 133,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ],
+          "target": [
+            {
+              "id": "in-top",
+              "type": "target",
+              "nodeId": "robot-1",
+              "position": "top",
+              "x": 64,
+              "y": -5,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "in-left",
+              "type": "target",
+              "nodeId": "robot-1",
+              "position": "left",
+              "x": -5,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ]
+        },
+        "selected": false,
+        "dragging": false,
+        "resizing": false,
+        "initialized": false,
+        "isParent": false,
+        "position": {
+          "x": 520,
+          "y": 520
+        },
+        "data": {
+          "label": "机器狗/机械臂",
+          "role": "",
+          "kind": "robot",
+          "handles": [
+            "in-top",
+            "out-bottom",
+            "in-left",
+            "out-right"
+          ],
+          "active": false,
+          "flashActive": false
+        },
+        "events": {},
+        "style": {
+          "width": "140px"
+        },
+        "zIndex": 10
+      },
+      {
+        "id": "labubu-1",
+        "type": "mission",
+        "dimensions": {
+          "width": 140,
+          "height": 64
+        },
+        "computedPosition": {
+          "x": 840,
+          "y": 520,
+          "z": 10
+        },
+        "handleBounds": {
+          "source": [
+            {
+              "id": "out-bottom",
+              "type": "source",
+              "nodeId": "labubu-1",
+              "position": "bottom",
+              "x": 64,
+              "y": 57,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "out-right",
+              "type": "source",
+              "nodeId": "labubu-1",
+              "position": "right",
+              "x": 133,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ],
+          "target": [
+            {
+              "id": "in-top",
+              "type": "target",
+              "nodeId": "labubu-1",
+              "position": "top",
+              "x": 64,
+              "y": -5,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "in-left",
+              "type": "target",
+              "nodeId": "labubu-1",
+              "position": "left",
+              "x": -5,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ]
+        },
+        "selected": false,
+        "dragging": false,
+        "resizing": false,
+        "initialized": false,
+        "isParent": false,
+        "position": {
+          "x": 840,
+          "y": 520
+        },
+        "data": {
+          "label": "Labubu",
+          "role": "",
+          "kind": "labubu",
+          "handles": [
+            "in-top",
+            "out-bottom",
+            "in-left",
+            "out-right"
+          ],
+          "active": false,
+          "flashActive": false
+        },
+        "events": {},
+        "style": {
+          "width": "140px"
+        },
+        "zIndex": 10
+      },
+      {
+        "id": "aic-1",
+        "type": "mission",
+        "dimensions": {
+          "width": 140,
+          "height": 64
+        },
+        "computedPosition": {
+          "x": 820,
+          "y": 380,
+          "z": 10
+        },
+        "handleBounds": {
+          "source": [
+            {
+              "id": "out-bottom",
+              "type": "source",
+              "nodeId": "aic-1",
+              "position": "bottom",
+              "x": 64,
+              "y": 57,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "out-right",
+              "type": "source",
+              "nodeId": "aic-1",
+              "position": "right",
+              "x": 133,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ],
+          "target": [
+            {
+              "id": "in-top",
+              "type": "target",
+              "nodeId": "aic-1",
+              "position": "top",
+              "x": 64,
+              "y": -5,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "in-left",
+              "type": "target",
+              "nodeId": "aic-1",
+              "position": "left",
+              "x": -5,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ]
+        },
+        "selected": false,
+        "dragging": false,
+        "resizing": false,
+        "initialized": false,
+        "isParent": false,
+        "position": {
+          "x": 820,
+          "y": 380
+        },
+        "data": {
+          "label": "智算沙箱服务CS",
+          "role": "",
+          "kind": "aic",
+          "handles": [
+            "in-top",
+            "out-bottom",
+            "in-left",
+            "out-right"
+          ],
+          "active": false,
+          "flashActive": false
+        },
+        "events": {},
+        "style": {
+          "width": "140px"
+        },
+        "zIndex": 10
+      },
+      {
+        "id": "maas-1",
+        "type": "mission",
+        "dimensions": {
+          "width": 140,
+          "height": 64
+        },
+        "computedPosition": {
+          "x": 820,
+          "y": 280,
+          "z": 10
+        },
+        "handleBounds": {
+          "source": [
+            {
+              "id": "out-bottom",
+              "type": "source",
+              "nodeId": "maas-1",
+              "position": "bottom",
+              "x": 64,
+              "y": 57,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "out-right",
+              "type": "source",
+              "nodeId": "maas-1",
+              "position": "right",
+              "x": 133,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ],
+          "target": [
+            {
+              "id": "in-top",
+              "type": "target",
+              "nodeId": "maas-1",
+              "position": "top",
+              "x": 64,
+              "y": -5,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "in-left",
+              "type": "target",
+              "nodeId": "maas-1",
+              "position": "left",
+              "x": -5,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ]
+        },
+        "selected": false,
+        "dragging": false,
+        "resizing": false,
+        "initialized": false,
+        "isParent": false,
+        "position": {
+          "x": 820,
+          "y": 280
+        },
+        "data": {
+          "label": "计算服务功能(MaaS)",
+          "role": "",
+          "kind": "maas",
+          "handles": [
+            "in-top",
+            "out-bottom",
+            "in-left",
+            "out-right"
+          ],
+          "active": false,
+          "flashActive": false
+        },
+        "events": {},
+        "style": {
+          "width": "140px"
+        },
+        "zIndex": 10
+      },
+      {
+        "id": "region-external-1",
+        "type": "region",
+        "dimensions": {
+          "width": 420,
+          "height": 280
+        },
+        "computedPosition": {
+          "x": 320,
+          "y": 80,
+          "z": 0
+        },
+        "handleBounds": {
+          "source": null,
+          "target": null
+        },
+        "selected": false,
+        "dragging": false,
+        "resizing": false,
+        "initialized": false,
+        "isParent": false,
+        "position": {
+          "x": 320,
+          "y": 80
+        },
+        "data": {
+          "label": "智能体服务域",
+          "variant": "external",
+          "pattern": "grid"
+        },
+        "events": {},
+        "style": {
+          "width": "420px",
+          "height": "280px"
+        },
+        "zIndex": 0
+      },
+      {
+        "id": "region-default-2",
+        "type": "region",
+        "dimensions": {
+          "width": 260,
+          "height": 480
+        },
+        "computedPosition": {
+          "x": 760,
+          "y": 0,
+          "z": 0
+        },
+        "handleBounds": {
+          "source": null,
+          "target": null
+        },
+        "selected": false,
+        "dragging": false,
+        "resizing": false,
+        "initialized": false,
+        "isParent": false,
+        "position": {
+          "x": 760,
+          "y": 0
+        },
+        "data": {
+          "label": "公共网络域（DN）",
+          "variant": "default",
+          "pattern": "dots"
+        },
+        "events": {},
+        "style": {
+          "width": "260px",
+          "height": "480px"
+        },
+        "zIndex": 0
+      },
+      {
+        "id": "bar-1",
+        "type": "bar",
+        "dimensions": {
+          "width": 140,
+          "height": 28
+        },
+        "computedPosition": {
+          "x": 120,
+          "y": 140,
+          "z": 10
+        },
+        "handleBounds": {
+          "source": [
+            {
+              "id": "out-top",
+              "type": "source",
+              "nodeId": "bar-1",
+              "position": "top",
+              "x": 64,
+              "y": -6,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "out-bottom",
+              "type": "source",
+              "nodeId": "bar-1",
+              "position": "bottom",
+              "x": 64,
+              "y": 22,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "out-right",
+              "type": "source",
+              "nodeId": "bar-1",
+              "position": "right",
+              "x": 134,
+              "y": 8,
+              "width": 12,
+              "height": 12
+            }
+          ],
+          "target": [
+            {
+              "id": "in-top",
+              "type": "target",
+              "nodeId": "bar-1",
+              "position": "top",
+              "x": 64,
+              "y": -6,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "in-bottom",
+              "type": "target",
+              "nodeId": "bar-1",
+              "position": "bottom",
+              "x": 64,
+              "y": 22,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "in-left",
+              "type": "target",
+              "nodeId": "bar-1",
+              "position": "left",
+              "x": -6,
+              "y": 8,
+              "width": 12,
+              "height": 12
+            }
+          ]
+        },
+        "selected": false,
+        "dragging": false,
+        "resizing": false,
+        "initialized": false,
+        "isParent": false,
+        "position": {
+          "x": 120,
+          "y": 140
+        },
+        "data": {
+          "color": "#64748b",
+          "height": 8
+        },
+        "events": {},
+        "style": {
+          "width": "140px",
+          "height": "28px"
+        },
+        "zIndex": 10
+      },
+      {
+        "id": "user_plane-1",
+        "type": "mission",
+        "dimensions": {
+          "width": 140,
+          "height": 64
+        },
+        "computedPosition": {
+          "x": 520,
+          "y": 380,
+          "z": 10
+        },
+        "handleBounds": {
+          "source": [
+            {
+              "id": "out-bottom",
+              "type": "source",
+              "nodeId": "user_plane-1",
+              "position": "bottom",
+              "x": 64,
+              "y": 57,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "out-right",
+              "type": "source",
+              "nodeId": "user_plane-1",
+              "position": "right",
+              "x": 133,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ],
+          "target": [
+            {
+              "id": "in-top",
+              "type": "target",
+              "nodeId": "user_plane-1",
+              "position": "top",
+              "x": 64,
+              "y": -5,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "in-left",
+              "type": "target",
+              "nodeId": "user_plane-1",
+              "position": "left",
+              "x": -5,
+              "y": 26,
+              "width": 12,
+              "height": 12
+            }
+          ]
+        },
+        "selected": false,
+        "dragging": false,
+        "resizing": false,
+        "initialized": false,
+        "isParent": false,
+        "position": {
+          "x": 520,
+          "y": 380
+        },
+        "data": {
+          "label": "用户面",
+          "role": "",
+          "kind": "user_plane",
+          "handles": [
+            "in-top",
+            "out-bottom",
+            "in-left",
+            "out-right"
+          ],
+          "active": false,
+          "flashActive": false
+        },
+        "events": {},
+        "style": {
+          "width": "140px"
+        },
+        "zIndex": 10
+      }
+    ],
+    "edges": [
+      {
+        "id": "e-idm-1-bar-1-mnyczqoo",
+        "type": "mission",
+        "source": "idm-1",
+        "target": "bar-1",
+        "sourceHandle": "out-bottom",
+        "targetHandle": "out-top",
+        "data": {
+          "kind": "baseline",
+          "state": "idle",
+          "pathType": "bezier"
+        },
+        "events": {},
+        "label": "",
+        "sourceNode": {
+          "id": "idm-1",
+          "type": "mission",
+          "dimensions": {
+            "width": 140,
+            "height": 64
+          },
+          "computedPosition": {
+            "x": 120,
+            "y": 60,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "idm-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "idm-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "idm-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "idm-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 120,
+            "y": 60
+          },
+          "data": {
+            "label": "身份管理IDM",
+            "role": "",
+            "kind": "idm",
+            "handles": [
+              "in-top",
+              "out-bottom",
+              "in-left",
+              "out-right"
+            ],
+            "active": false,
+            "flashActive": false
+          },
+          "events": {},
+          "style": {
+            "width": "140px"
+          },
+          "zIndex": 10
+        },
+        "targetNode": {
+          "id": "bar-1",
+          "type": "bar",
+          "dimensions": {
+            "width": 140,
+            "height": 28
+          },
+          "computedPosition": {
+            "x": 120,
+            "y": 140,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-top",
+                "type": "source",
+                "nodeId": "bar-1",
+                "position": "top",
+                "x": 64,
+                "y": -6,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "bar-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 22,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "bar-1",
+                "position": "right",
+                "x": 134,
+                "y": 8,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "bar-1",
+                "position": "top",
+                "x": 64,
+                "y": -6,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-bottom",
+                "type": "target",
+                "nodeId": "bar-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 22,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "bar-1",
+                "position": "left",
+                "x": -6,
+                "y": 8,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 120,
+            "y": 140
+          },
+          "data": {
+            "color": "#64748b",
+            "height": 8
+          },
+          "events": {},
+          "style": {
+            "width": "140px",
+            "height": "28px"
+          },
+          "zIndex": 10
+        },
+        "sourceX": 190,
+        "sourceY": 129,
+        "targetX": 190,
+        "targetY": 134
+      },
+      {
+        "id": "e-bar-1-signaling-1-mnycztec",
+        "type": "mission",
+        "source": "bar-1",
+        "target": "signaling-1",
+        "sourceHandle": "out-bottom",
+        "targetHandle": "in-top",
+        "data": {
+          "kind": "baseline",
+          "state": "idle",
+          "pathType": "bezier"
+        },
+        "events": {},
+        "label": "",
+        "sourceNode": {
+          "id": "bar-1",
+          "type": "bar",
+          "dimensions": {
+            "width": 140,
+            "height": 28
+          },
+          "computedPosition": {
+            "x": 120,
+            "y": 140,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-top",
+                "type": "source",
+                "nodeId": "bar-1",
+                "position": "top",
+                "x": 64,
+                "y": -6,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "bar-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 22,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "bar-1",
+                "position": "right",
+                "x": 134,
+                "y": 8,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "bar-1",
+                "position": "top",
+                "x": 64,
+                "y": -6,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-bottom",
+                "type": "target",
+                "nodeId": "bar-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 22,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "bar-1",
+                "position": "left",
+                "x": -6,
+                "y": 8,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 120,
+            "y": 140
+          },
+          "data": {
+            "color": "#64748b",
+            "height": 8
+          },
+          "events": {},
+          "style": {
+            "width": "140px",
+            "height": "28px"
+          },
+          "zIndex": 10
+        },
+        "targetNode": {
+          "id": "signaling-1",
+          "type": "mission",
+          "dimensions": {
+            "width": 140,
+            "height": 64
+          },
+          "computedPosition": {
+            "x": 120,
+            "y": 220,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "signaling-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "signaling-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "signaling-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "signaling-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 120,
+            "y": 220
+          },
+          "data": {
+            "label": "信令路由SRF",
+            "role": "",
+            "kind": "signaling",
+            "handles": [
+              "in-top",
+              "out-bottom",
+              "in-left",
+              "out-right"
+            ],
+            "active": false,
+            "flashActive": false
+          },
+          "events": {},
+          "style": {
+            "width": "140px"
+          },
+          "zIndex": 10
+        },
+        "sourceX": 190,
+        "sourceY": 174,
+        "targetX": 190,
+        "targetY": 215
+      },
+      {
+        "id": "a",
+        "type": "mission",
+        "source": "signaling-1",
+        "target": "base_station-1",
+        "sourceHandle": "out-bottom",
+        "targetHandle": "in-top",
+        "data": {
+          "kind": "baseline",
+          "state": "idle",
+          "pathType": "bezier",
+          "direction": "reverse",
+          "glow": true
+        },
+        "events": {},
+        "label": "",
+        "sourceNode": {
+          "id": "signaling-1",
+          "type": "mission",
+          "dimensions": {
+            "width": 140,
+            "height": 64
+          },
+          "computedPosition": {
+            "x": 120,
+            "y": 220,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "signaling-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "signaling-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "signaling-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "signaling-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 120,
+            "y": 220
+          },
+          "data": {
+            "label": "信令路由SRF",
+            "role": "",
+            "kind": "signaling",
+            "handles": [
+              "in-top",
+              "out-bottom",
+              "in-left",
+              "out-right"
+            ],
+            "active": false,
+            "flashActive": false
+          },
+          "events": {},
+          "style": {
+            "width": "140px"
+          },
+          "zIndex": 10
+        },
+        "targetNode": {
+          "id": "base_station-1",
+          "type": "mission",
+          "dimensions": {
+            "width": 140,
+            "height": 64
+          },
+          "computedPosition": {
+            "x": 120,
+            "y": 520,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 120,
+            "y": 520
+          },
+          "data": {
+            "label": "无线基站RAN",
+            "role": "",
+            "kind": "base_station",
+            "handles": [
+              "in-top",
+              "out-bottom",
+              "in-left",
+              "out-right"
+            ],
+            "active": false,
+            "flashActive": false
+          },
+          "events": {},
+          "style": {
+            "width": "140px"
+          },
+          "zIndex": 10
+        },
+        "sourceX": 190,
+        "sourceY": 289,
+        "targetX": 190,
+        "targetY": 515,
+        "selected": false
+      },
+      {
+        "id": "e-base_station-1-glass-mnyd07a4",
+        "type": "mission",
+        "source": "base_station-1",
+        "target": "glass",
+        "sourceHandle": "out-right",
+        "targetHandle": "in-left",
+        "data": {
+          "kind": "baseline",
+          "state": "idle",
+          "pathType": "straight",
+          "direction": "reverse",
+          "glow": true
+        },
+        "events": {},
+        "label": "",
+        "sourceNode": {
+          "id": "base_station-1",
+          "type": "mission",
+          "dimensions": {
+            "width": 140,
+            "height": 64
+          },
+          "computedPosition": {
+            "x": 120,
+            "y": 520,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 120,
+            "y": 520
+          },
+          "data": {
+            "label": "无线基站RAN",
+            "role": "",
+            "kind": "base_station",
+            "handles": [
+              "in-top",
+              "out-bottom",
+              "in-left",
+              "out-right"
+            ],
+            "active": false,
+            "flashActive": false
+          },
+          "events": {},
+          "style": {
+            "width": "140px"
+          },
+          "zIndex": 10
+        },
+        "targetNode": {
+          "id": "glass",
+          "type": "mission",
+          "dimensions": {
+            "width": 140,
+            "height": 64
+          },
+          "computedPosition": {
+            "x": 340,
+            "y": 580,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "glass",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "glass",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "glass",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "glass",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 340,
+            "y": 580
+          },
+          "data": {
+            "label": "AR 眼镜",
+            "role": "",
+            "kind": "glasses",
+            "handles": [
+              "in-top",
+              "out-bottom",
+              "in-left",
+              "out-right"
+            ],
+            "active": false,
+            "flashActive": false
+          },
+          "events": {},
+          "style": {
+            "width": "140px"
+          },
+          "zIndex": 10
+        },
+        "sourceX": 265,
+        "sourceY": 552,
+        "targetX": 335,
+        "targetY": 612,
+        "selected": false
+      },
+      {
+        "id": "e-base_station-1-robot-1-mnyd0cvs",
+        "type": "mission",
+        "source": "base_station-1",
+        "target": "robot-1",
+        "sourceHandle": "out-right",
+        "targetHandle": "in-left",
+        "data": {
+          "kind": "baseline",
+          "state": "idle",
+          "pathType": "straight",
+          "direction": "forward",
+          "glow": true
+        },
+        "events": {},
+        "label": "",
+        "sourceNode": {
+          "id": "base_station-1",
+          "type": "mission",
+          "dimensions": {
+            "width": 140,
+            "height": 64
+          },
+          "computedPosition": {
+            "x": 120,
+            "y": 520,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 120,
+            "y": 520
+          },
+          "data": {
+            "label": "无线基站RAN",
+            "role": "",
+            "kind": "base_station",
+            "handles": [
+              "in-top",
+              "out-bottom",
+              "in-left",
+              "out-right"
+            ],
+            "active": false,
+            "flashActive": false
+          },
+          "events": {},
+          "style": {
+            "width": "140px"
+          },
+          "zIndex": 10
+        },
+        "targetNode": {
+          "id": "robot-1",
+          "type": "mission",
+          "dimensions": {
+            "width": 140,
+            "height": 64
+          },
+          "computedPosition": {
+            "x": 520,
+            "y": 520,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "robot-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "robot-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "robot-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "robot-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 520,
+            "y": 520
+          },
+          "data": {
+            "label": "机器狗/机械臂",
+            "role": "",
+            "kind": "robot",
+            "handles": [
+              "in-top",
+              "out-bottom",
+              "in-left",
+              "out-right"
+            ],
+            "active": false,
+            "flashActive": false
+          },
+          "events": {},
+          "style": {
+            "width": "140px"
+          },
+          "zIndex": 10
+        },
+        "sourceX": 265,
+        "sourceY": 552,
+        "targetX": 515,
+        "targetY": 552,
+        "selected": false
+      },
+      {
+        "id": "e-connect_agent-1-user_plane-1-mnyd3rhd",
+        "type": "mission",
+        "source": "connect_agent-1",
+        "target": "user_plane-1",
+        "sourceHandle": "out-bottom",
+        "targetHandle": "in-top",
+        "data": {
+          "kind": "baseline",
+          "state": "idle",
+          "pathType": "bezier",
+          "direction": "forward",
+          "glow": true
+        },
+        "events": {},
+        "label": "",
+        "sourceNode": {
+          "id": "connect_agent-1",
+          "type": "mission",
+          "dimensions": {
+            "width": 140,
+            "height": 64
+          },
+          "computedPosition": {
+            "x": 520,
+            "y": 280,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "connect_agent-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "connect_agent-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "connect_agent-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "connect_agent-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 520,
+            "y": 280
+          },
+          "data": {
+            "label": "连接智能体",
+            "role": "",
+            "kind": "connect_agent",
+            "handles": [
+              "in-top",
+              "out-bottom",
+              "in-left",
+              "out-right"
+            ],
+            "active": false,
+            "flashActive": false
+          },
+          "events": {},
+          "style": {
+            "width": "140px"
+          },
+          "zIndex": 10
+        },
+        "targetNode": {
+          "id": "user_plane-1",
+          "type": "mission",
+          "dimensions": {
+            "width": 140,
+            "height": 64
+          },
+          "computedPosition": {
+            "x": 520,
+            "y": 380,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "user_plane-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "user_plane-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "user_plane-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "user_plane-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 520,
+            "y": 380
+          },
+          "data": {
+            "label": "用户面",
+            "role": "",
+            "kind": "user_plane",
+            "handles": [
+              "in-top",
+              "out-bottom",
+              "in-left",
+              "out-right"
+            ],
+            "active": false,
+            "flashActive": false
+          },
+          "events": {},
+          "style": {
+            "width": "140px"
+          },
+          "zIndex": 10
+        },
+        "sourceX": 590,
+        "sourceY": 349,
+        "targetX": 590,
+        "targetY": 375,
+        "selected": false
+      },
+      {
+        "id": "e-sys_agent-1-acn_agent-1-mnyfgvgt",
+        "type": "mission",
+        "source": "sys_agent-1",
+        "target": "acn_agent-1",
+        "sourceHandle": "out-right",
+        "targetHandle": "in-left",
+        "data": {
+          "kind": "baseline",
+          "state": "idle",
+          "pathType": "straight"
+        },
+        "events": {},
+        "label": "",
+        "sourceNode": {
+          "id": "sys_agent-1",
+          "type": "mission",
+          "dimensions": {
+            "width": 140,
+            "height": 64
+          },
+          "computedPosition": {
+            "x": 340,
+            "y": 200,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "sys_agent-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "sys_agent-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "sys_agent-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "sys_agent-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 340,
+            "y": 200
+          },
+          "data": {
+            "label": "SYS 智能体",
+            "role": "",
+            "kind": "sys_agent",
+            "handles": [
+              "in-top",
+              "out-bottom",
+              "in-left",
+              "out-right"
+            ],
+            "active": false,
+            "flashActive": false
+          },
+          "events": {},
+          "style": {
+            "width": "140px"
+          },
+          "zIndex": 10
+        },
+        "targetNode": {
+          "id": "acn_agent-1",
+          "type": "mission",
+          "dimensions": {
+            "width": 140,
+            "height": 64
+          },
+          "computedPosition": {
+            "x": 520,
+            "y": 120,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "acn_agent-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "acn_agent-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "acn_agent-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "acn_agent-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 520,
+            "y": 120
+          },
+          "data": {
+            "label": "ACN 智能体",
+            "role": "",
+            "kind": "acn_agent",
+            "handles": [
+              "in-top",
+              "out-bottom",
+              "in-left",
+              "out-right"
+            ],
+            "active": false,
+            "flashActive": false
+          },
+          "events": {},
+          "style": {
+            "width": "140px"
+          },
+          "zIndex": 10
+        },
+        "sourceX": 485,
+        "sourceY": 232,
+        "targetX": 515,
+        "targetY": 152,
+        "selected": false
+      },
+      {
+        "id": "e-sys_agent-1-connect_agent-1-mnyfgwzl",
+        "type": "mission",
+        "source": "sys_agent-1",
+        "target": "connect_agent-1",
+        "sourceHandle": "out-right",
+        "targetHandle": "in-left",
+        "data": {
+          "kind": "baseline",
+          "state": "idle",
+          "pathType": "straight"
+        },
+        "events": {},
+        "label": "",
+        "sourceNode": {
+          "id": "sys_agent-1",
+          "type": "mission",
+          "dimensions": {
+            "width": 140,
+            "height": 64
+          },
+          "computedPosition": {
+            "x": 340,
+            "y": 200,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "sys_agent-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "sys_agent-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "sys_agent-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "sys_agent-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 340,
+            "y": 200
+          },
+          "data": {
+            "label": "SYS 智能体",
+            "role": "",
+            "kind": "sys_agent",
+            "handles": [
+              "in-top",
+              "out-bottom",
+              "in-left",
+              "out-right"
+            ],
+            "active": false,
+            "flashActive": false
+          },
+          "events": {},
+          "style": {
+            "width": "140px"
+          },
+          "zIndex": 10
+        },
+        "targetNode": {
+          "id": "connect_agent-1",
+          "type": "mission",
+          "dimensions": {
+            "width": 140,
+            "height": 64
+          },
+          "computedPosition": {
+            "x": 520,
+            "y": 280,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "connect_agent-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "connect_agent-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "connect_agent-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "connect_agent-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 520,
+            "y": 280
+          },
+          "data": {
+            "label": "连接智能体",
+            "role": "",
+            "kind": "connect_agent",
+            "handles": [
+              "in-top",
+              "out-bottom",
+              "in-left",
+              "out-right"
+            ],
+            "active": false,
+            "flashActive": false
+          },
+          "events": {},
+          "style": {
+            "width": "140px"
+          },
+          "zIndex": 10
+        },
+        "sourceX": 485,
+        "sourceY": 232,
+        "targetX": 515,
+        "targetY": 312,
+        "selected": false
+      },
+      {
+        "id": "e-robot-1-labubu-1-mnyijdly",
+        "type": "mission",
+        "source": "robot-1",
+        "target": "labubu-1",
+        "sourceHandle": "out-right",
+        "targetHandle": "in-left",
+        "data": {
+          "kind": "baseline",
+          "state": "idle",
+          "pathType": "bezier"
+        },
+        "events": {},
+        "label": "",
+        "sourceNode": {
+          "id": "robot-1",
+          "type": "mission",
+          "dimensions": {
+            "width": 140,
+            "height": 64
+          },
+          "computedPosition": {
+            "x": 520,
+            "y": 520,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "robot-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "robot-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "robot-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "robot-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 520,
+            "y": 520
+          },
+          "data": {
+            "label": "机器狗/机械臂",
+            "role": "",
+            "kind": "robot",
+            "handles": [
+              "in-top",
+              "out-bottom",
+              "in-left",
+              "out-right"
+            ],
+            "active": false,
+            "flashActive": false
+          },
+          "events": {},
+          "style": {
+            "width": "140px"
+          },
+          "zIndex": 10
+        },
+        "targetNode": {
+          "id": "labubu-1",
+          "type": "mission",
+          "dimensions": {
+            "width": 140,
+            "height": 64
+          },
+          "computedPosition": {
+            "x": 840,
+            "y": 520,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "labubu-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "labubu-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "labubu-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "labubu-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 840,
+            "y": 520
+          },
+          "data": {
+            "label": "Labubu",
+            "role": "",
+            "kind": "labubu",
+            "handles": [
+              "in-top",
+              "out-bottom",
+              "in-left",
+              "out-right"
+            ],
+            "active": false,
+            "flashActive": false
+          },
+          "events": {},
+          "style": {
+            "width": "140px"
+          },
+          "zIndex": 10
+        },
+        "sourceX": 665,
+        "sourceY": 552,
+        "targetX": 835,
+        "targetY": 552
+      },
+      {
+        "id": "e-bar-1-sys_agent-1-mnzox6ke",
+        "type": "mission",
+        "source": "bar-1",
+        "target": "sys_agent-1",
+        "sourceHandle": "out-bottom",
+        "targetHandle": "in-top",
+        "data": {
+          "kind": "baseline",
+          "state": "idle",
+          "pathType": "straight"
+        },
+        "events": {},
+        "label": "",
+        "sourceNode": {
+          "id": "bar-1",
+          "type": "bar",
+          "dimensions": {
+            "width": 140,
+            "height": 28
+          },
+          "computedPosition": {
+            "x": 120,
+            "y": 140,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-top",
+                "type": "source",
+                "nodeId": "bar-1",
+                "position": "top",
+                "x": 64,
+                "y": -6,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "bar-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 22,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "bar-1",
+                "position": "right",
+                "x": 134,
+                "y": 8,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "bar-1",
+                "position": "top",
+                "x": 64,
+                "y": -6,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-bottom",
+                "type": "target",
+                "nodeId": "bar-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 22,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "bar-1",
+                "position": "left",
+                "x": -6,
+                "y": 8,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 120,
+            "y": 140
+          },
+          "data": {
+            "color": "#64748b",
+            "height": 8
+          },
+          "events": {},
+          "style": {
+            "width": "140px",
+            "height": "28px"
+          },
+          "zIndex": 10
+        },
+        "targetNode": {
+          "id": "sys_agent-1",
+          "type": "mission",
+          "dimensions": {
+            "width": 140,
+            "height": 64
+          },
+          "computedPosition": {
+            "x": 340,
+            "y": 200,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "sys_agent-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "sys_agent-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "sys_agent-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "sys_agent-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 340,
+            "y": 200
+          },
+          "data": {
+            "label": "SYS 智能体",
+            "role": "",
+            "kind": "sys_agent",
+            "handles": [
+              "in-top",
+              "out-bottom",
+              "in-left",
+              "out-right"
+            ],
+            "active": false,
+            "flashActive": false
+          },
+          "events": {},
+          "style": {
+            "width": "140px"
+          },
+          "zIndex": 10
+        },
+        "sourceX": 190,
+        "sourceY": 174,
+        "targetX": 410,
+        "targetY": 195,
+        "selected": false
+      },
+      {
+        "id": "e-user_plane-1-aic-1-mnzozrta",
+        "type": "mission",
+        "source": "user_plane-1",
+        "target": "aic-1",
+        "sourceHandle": "out-right",
+        "targetHandle": "in-left",
+        "data": {
+          "kind": "baseline",
+          "state": "idle",
+          "pathType": "straight"
+        },
+        "events": {},
+        "label": "",
+        "sourceNode": {
+          "id": "user_plane-1",
+          "type": "mission",
+          "dimensions": {
+            "width": 140,
+            "height": 64
+          },
+          "computedPosition": {
+            "x": 520,
+            "y": 380,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "user_plane-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "user_plane-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "user_plane-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "user_plane-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 520,
+            "y": 380
+          },
+          "data": {
+            "label": "用户面",
+            "role": "",
+            "kind": "user_plane",
+            "handles": [
+              "in-top",
+              "out-bottom",
+              "in-left",
+              "out-right"
+            ],
+            "active": false,
+            "flashActive": false
+          },
+          "events": {},
+          "style": {
+            "width": "140px"
+          },
+          "zIndex": 10
+        },
+        "targetNode": {
+          "id": "aic-1",
+          "type": "mission",
+          "dimensions": {
+            "width": 140,
+            "height": 64
+          },
+          "computedPosition": {
+            "x": 820,
+            "y": 380,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "aic-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "aic-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "aic-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "aic-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 820,
+            "y": 380
+          },
+          "data": {
+            "label": "智算沙箱服务CS",
+            "role": "",
+            "kind": "aic",
+            "handles": [
+              "in-top",
+              "out-bottom",
+              "in-left",
+              "out-right"
+            ],
+            "active": false,
+            "flashActive": false
+          },
+          "events": {},
+          "style": {
+            "width": "140px"
+          },
+          "zIndex": 10
+        },
+        "sourceX": 665,
+        "sourceY": 412,
+        "targetX": 815,
+        "targetY": 412,
+        "selected": false
+      }
+    ]
+  },
+  "sequence": [],
+  "legend": {
+    "visible": false,
+    "items": []
+  },
+  "captionTop": 12
+}

@@ -13,13 +13,23 @@
       :style="{ '--bar-color': color, height: bodyHeight + 'px' }"
     ></div>
 
-    <!-- 上中 / 下中 -->
-    <Handle id="in-top"     type="target" :position="Position.Top"    :style="{ left: '50%' }" />
-    <Handle id="out-top"    type="source" :position="Position.Top"    :style="{ left: '50%' }" />
-    <Handle id="in-bottom"  type="target" :position="Position.Bottom" :style="{ left: '50%' }" />
-    <Handle id="out-bottom" type="source" :position="Position.Bottom" :style="{ left: '50%' }" />
-    <Handle id="in-left"    type="target" :position="Position.Left"   :style="{ top: '50%' }" />
-    <Handle id="out-right"  type="source" :position="Position.Right"  :style="{ top: '50%' }" />
+    <!-- 中 / 1/4 / 3/4 · 每边各有 source + target，支持 out-<side>-25 / in-<side>-75 等 id -->
+    <template v-for="side in (['top','bottom','left','right'] as const)" :key="side">
+      <template v-for="off in (['', '-25', '-75'] as const)" :key="side + off">
+        <Handle
+          :id="`in-${side}${off}`"
+          type="target"
+          :position="sidePos[side]"
+          :style="barStyle(side, off)"
+        />
+        <Handle
+          :id="`out-${side}${off}`"
+          type="source"
+          :position="sidePos[side]"
+          :style="barStyle(side, off)"
+        />
+      </template>
+    </template>
   </div>
 </template>
 
@@ -35,4 +45,18 @@ const bodyHeight = computed(() => {
   const v = Number(props.data?.height ?? 8)
   return isNaN(v) ? 8 : Math.max(2, Math.min(v, 26))
 })
+
+type Side = 'top' | 'bottom' | 'left' | 'right'
+type Off  = '' | '-25' | '-75'
+const sidePos: Record<Side, Position> = {
+  top:    Position.Top,
+  bottom: Position.Bottom,
+  left:   Position.Left,
+  right:  Position.Right
+}
+function barStyle(side: Side, off: Off) {
+  const pct = off === '-25' ? '25%' : off === '-75' ? '75%' : '50%'
+  const axis = (side === 'top' || side === 'bottom') ? 'left' : 'top'
+  return { [axis]: pct } as Record<string, string>
+}
 </script>

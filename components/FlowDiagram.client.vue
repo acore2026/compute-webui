@@ -2,8 +2,17 @@
   <section class="panel flex flex-col h-full overflow-hidden">
     <div class="panel-header">
       <div class="flex items-center gap-2">
-        <span class="title-kicker">Topology</span>
         <span>架构图</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <button
+          v-for="v in viewTabs"
+          :key="v.id"
+          :class="['sidebar-tab', activeView === v.id && 'sidebar-tab-active']"
+          @click="switchView(v.id)"
+        >
+          {{ v.label }}
+        </button>
       </div>
     </div>
 
@@ -88,7 +97,14 @@ import MissionEdge from './flow/MissionEdge.vue'
 import RegionNode from './flow/RegionNode.vue'
 import BusNode from './flow/BusNode.vue'
 import BarNode from './flow/BarNode.vue'
-import { loadAll, pushRemoteState, type SequenceStep, type LegendConfig } from './flow/storage'
+import {
+  loadAll,
+  pushRemoteState,
+  DEFAULT_VIEW,
+  type SequenceStep,
+  type LegendConfig,
+  type ViewId
+} from './flow/storage'
 
 const nodeTypes = {
   mission: markRaw(MissionNode),
@@ -104,9 +120,14 @@ const sequence = ref<SequenceStep[]>([])
 const legend = ref<LegendConfig>({ visible: false, items: [] })
 const captionTop = ref<number>(40)
 
-// 初始化：异步从 server 拉取，剥离演示残留（气泡、清单也一并清掉）
-async function hydrate() {
-  const all = await loadAll()
+const viewTabs: { id: ViewId; label: string }[] = [
+  { id: 'public-cloud', label: '公有云' },
+  { id: 'core-network', label: '核心网' }
+]
+const activeView = ref<ViewId>(DEFAULT_VIEW)
+
+async function hydrate(view: ViewId) {
+  const all = await loadAll(view)
   nodes.value = all.topology.nodes.map(n => {
     if (n.type !== 'mission') return { ...n }
     const d = (n.data || {}) as any
@@ -126,19 +147,33 @@ async function hydrate() {
   legend.value = all.legend
   captionTop.value = all.captionTop
 }
-hydrate()
+hydrate(activeView.value)
+
+async function switchView(next: ViewId) {
+  if (next === activeView.value) return
+  // 停掉演示、清除高亮、释放 baseSnap，避免跨视图污染
+  timers.forEach(clearTimeout); timers = []
+  baseSnap = null
+  activeView.value = next
+  caption.value = { ...DEFAULT_CAPTION }
+  captionKey.value++
+  await hydrate(next)
+  hasSeq.value = !!sequence.value.length
+  hasNodes.value = nodes.value.length > 0
+}
 
 // ---- Caption 拖拽（位置保存到 server state） ----
 let saveCaptionTimer: any = null
 function saveCaptionTopDebounced() {
   clearTimeout(saveCaptionTimer)
+  const view = activeView.value
   saveCaptionTimer = setTimeout(() => {
     pushRemoteState({
       topology: { nodes: nodes.value, edges: edges.value },
       sequence: sequence.value,
       legend:   legend.value,
       captionTop: captionTop.value
-    })
+    }, view)
   }, 500)
 }
 function onCaptionDragStart(e: MouseEvent) {
@@ -206,6 +241,19 @@ function restore() {
   baseSnap = null
 }
 
+// 纯"动画态"字段：每个 stage 独立，base 上的取值不 leak 到 stage。
+const EDGE_ANIM_ONLY = new Set(['state', 'direction', 'glow'])
+const NODE_ANIM_ONLY = new Set([
+  'active', 'flashActive', 'message', 'messageIcon', 'messageState', 'plan'
+])
+function stripKeys<T extends Record<string, any>>(obj: T, keys: Set<string>): T {
+  const out: Record<string, any> = {}
+  for (const k of Object.keys(obj)) {
+    if (!keys.has(k)) out[k] = (obj as any)[k]
+  }
+  return out as T
+}
+
 function applyStep(step: SequenceStep) {
   if (!baseSnap) snapshot()
   setCaption({ kicker: step.kicker, title: step.title, phase: step.phase })
@@ -215,36 +263,34 @@ function applyStep(step: SequenceStep) {
     if (n.type !== 'mission') return { ...n, data: { ...(n.data || {}) } }
     const isActive = step.nodes.includes(n.id)
     const baseData = (n.data || {}) as any
-    const ov = nodeS[n.id] || {}
+    const baseVisual = stripKeys(baseData, NODE_ANIM_ONLY)
+    const ov = (nodeS[n.id] || {}) as Record<string, any>
     const next: any = {
-      ...baseData,
+      ...baseVisual,
+      ...ov,
       active: ov.active ?? isActive,
       flashActive: ov.flashActive ?? isActive
     }
-    if (ov.message !== undefined)      next.message = ov.message
-    if (ov.messageIcon !== undefined)  next.messageIcon = ov.messageIcon
-    if (ov.messageState !== undefined) next.messageState = ov.messageState
-    if ('plan' in ov) {
-      if (ov.plan === null) delete next.plan
-      else next.plan = ov.plan
-    }
+    if ('plan' in ov && ov.plan === null) delete next.plan
     return { ...n, data: next }
   })
   const settings = step.edgeSettings || {}
   edges.value = base.edges.map(e => {
     const baseData = (e.data as any) || {}
-    const override = settings[e.id]
+    const baseVisual = stripKeys(baseData, EDGE_ANIM_ONLY)
+    const override = settings[e.id] as Record<string, any> | undefined
     const highlighted = step.edges.includes(e.id) || !!override
     if (!highlighted) {
-      return { ...e, data: { ...baseData, state: 'idle' } }
+      return { ...e, data: { ...baseVisual, state: 'idle', glow: false } }
     }
     return {
       ...e,
       data: {
-        ...baseData,
-        state: override?.state || 'selected',
-        direction: override?.direction ?? baseData.direction ?? 'forward',
-        glow:      override?.glow      ?? baseData.glow      ?? false
+        ...baseVisual,
+        ...(override || {}),
+        state:     override?.state     || 'selected',
+        direction: override?.direction || 'forward',
+        glow:      override?.glow      ?? false
       }
     }
   })

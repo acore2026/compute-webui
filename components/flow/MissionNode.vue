@@ -126,6 +126,18 @@ const handles = computed<H[]>(() => {
     if (id.includes('bottom')) pos = Position.Bottom
     if (id.includes('left'))   pos = Position.Left
     if (id.includes('right'))  pos = Position.Right
+
+    // 新格式：<in|out>-<side>-<25|75>，例如 out-top-25 / in-right-75
+    // axis: top/bottom 用 left 偏移；left/right 用 top 偏移
+    const quarterMatch = id.match(/^(in|out)-(top|bottom|left|right)-(25|75)$/)
+    if (quarterMatch) {
+      const side = quarterMatch[2]
+      const pct = quarterMatch[3] + '%'
+      const axis = (side === 'top' || side === 'bottom') ? 'left' : 'top'
+      style = { [axis]: pct }
+    }
+
+    // 兼容历史 38% / 68% 偏移 handle id
     if (id === 'out-top-left' || id === 'in-top-left')  { pos = Position.Top; style = { left: '38%' } }
     if (id === 'out-top-right' || id === 'in-top-right'){ pos = Position.Top; style = { left: '68%' } }
     if (id === 'out-bottom-left')  { pos = Position.Bottom; style = { left: '38%' } }

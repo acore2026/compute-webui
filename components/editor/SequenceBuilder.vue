@@ -6,8 +6,16 @@
         <span>动画序列编排 · 共 {{ steps.length }} 步</span>
       </div>
       <div class="flex items-center gap-2">
-        <button class="icon-button icon-button-sm" @click="addStep" title="新增步骤" :disabled="collapsed">
+        <button class="icon-button icon-button-sm" @click="addStep" title="新增空步骤" :disabled="collapsed">
           <el-icon :size="14"><Plus /></el-icon>
+        </button>
+        <button
+          class="icon-button icon-button-sm"
+          @click="duplicateLast"
+          title="复制上一步骤并追加"
+          :disabled="collapsed || !steps.length"
+        >
+          <el-icon :size="14"><DocumentCopy /></el-icon>
         </button>
         <button
           class="primary-button"
@@ -88,6 +96,9 @@
           >
             <el-icon :size="12"><View /></el-icon>
           </button>
+          <button class="icon-button icon-button-sm" @click="duplicate(idx)" title="复制本步骤并插入到下一位">
+            <el-icon :size="12"><DocumentCopy /></el-icon>
+          </button>
           <button class="icon-button icon-button-sm" @click="move(idx, -1)" :disabled="idx === 0" title="上移">
             <el-icon :size="12"><Top /></el-icon>
           </button>
@@ -104,7 +115,7 @@
 </template>
 
 <script setup lang="ts">
-import { Plus, VideoPlay, Top, Bottom, Delete, ArrowUp, ArrowDown, View } from '@element-plus/icons-vue'
+import { Plus, VideoPlay, Top, Bottom, Delete, ArrowUp, ArrowDown, View, DocumentCopy } from '@element-plus/icons-vue'
 import type { SequenceStep } from '../flow/storage'
 
 const props = defineProps<{
@@ -148,6 +159,38 @@ function addStep() {
     edges: []
   }
   update([...props.steps, newStep])
+}
+
+function deepClone<T>(v: T): T {
+  // 不用 structuredClone：Vue 响应式 Proxy / VueFlow 的 Raw/markRaw 对象会 DataCloneError。
+  // SequenceStep 全部是 JSON-safe 的 (string / number / plain object)，用 JSON 往返最稳。
+  return JSON.parse(JSON.stringify(v))
+}
+
+function cloneStep(src: SequenceStep, indexAfterInsert: number): SequenceStep {
+  const copy = deepClone(src)
+  copy.id = `step-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
+  // 若原 kicker 形如 "STAGE 3"，就把序号自动升级为目标位置的 1-based 索引；否则追加 (copy)
+  const match = typeof copy.kicker === 'string' ? copy.kicker.match(/^(.*?)(\d+)\s*$/) : null
+  if (match) {
+    copy.kicker = `${match[1]}${indexAfterInsert + 1}`
+  } else if (typeof copy.kicker === 'string') {
+    copy.kicker = `${copy.kicker} (copy)`
+  }
+  return copy
+}
+
+function duplicate(idx: number) {
+  if (idx < 0 || idx >= props.steps.length) return
+  const next = props.steps.slice()
+  const copy = cloneStep(next[idx], idx + 1)
+  next.splice(idx + 1, 0, copy)
+  update(next)
+}
+
+function duplicateLast() {
+  if (!props.steps.length) return
+  duplicate(props.steps.length - 1)
 }
 
 function patch(idx: number, key: keyof SequenceStep, value: any) {

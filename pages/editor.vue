@@ -11,7 +11,18 @@
           <span style="font-size:0.72rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#0369a1;">
             Architecture Editor
           </span>
-          <span style="font-size:0.92rem; font-weight:700;">架构图编辑器</span>
+          <span style="font-size:0.92rem; font-weight:700;">架构图编辑器 · {{ viewLabel }}</span>
+        </div>
+        <div class="flex items-center gap-1.5 ml-2">
+          <button
+            v-for="v in viewSwitchTabs"
+            :key="v.id"
+            :class="['sidebar-tab', activeView === v.id && 'sidebar-tab-active']"
+            @click="switchEditorView(v.id)"
+            :title="`编辑 ${v.label}`"
+          >
+            {{ v.label }}
+          </button>
         </div>
         <span class="status-badge status-badge-idle ml-2">
           <span class="status-badge-icon"></span>
@@ -356,9 +367,28 @@ import SequenceBuilder from '~/components/editor/SequenceBuilder.vue'
 import { kindMeta, type NodeKind } from '~/components/flow/kindMeta'
 import {
   loadAll, saveAll, fetchRemoteState,
-  DEFAULT_LEGEND,
-  type SequenceStep, type LegendConfig
+  DEFAULT_LEGEND, DEFAULT_VIEW, VIEW_IDS,
+  type SequenceStep, type LegendConfig, type ViewId
 } from '~/components/flow/storage'
+
+// ?view=public-cloud | core-network — 决定本次编辑哪张架构图
+const route = useRoute()
+const activeView = computed<ViewId>(() => {
+  const v = String(route.query.view ?? '')
+  return (VIEW_IDS as readonly string[]).includes(v) ? (v as ViewId) : DEFAULT_VIEW
+})
+const viewLabel = computed(() => (activeView.value === 'public-cloud' ? '公有云' : '核心网'))
+
+const viewSwitchTabs: { id: ViewId; label: string }[] = [
+  { id: 'public-cloud', label: '公有云' },
+  { id: 'core-network', label: '核心网' }
+]
+
+const router = useRouter()
+function switchEditorView(next: ViewId) {
+  if (next === activeView.value) return
+  router.replace({ query: { ...route.query, view: next } })
+}
 
 const nodeTypes = {
   mission: markRaw(MissionNode),
@@ -385,11 +415,22 @@ const missionNodeIds = computed(() => nodes.value.filter(n => n.type === 'missio
 const edgeIds = computed(() => edges.value.map(e => e.id))
 
 onMounted(async () => {
-  const all = await loadAll()
+  const all = await loadAll(activeView.value)
   nodes.value = all.topology.nodes
   edges.value = all.topology.edges
   sequence.value = all.sequence
   legend.value = all.legend
+})
+
+// 手动切换 ?view= 时重新装载
+watch(activeView, async (v) => {
+  const all = await loadAll(v)
+  nodes.value = all.topology.nodes
+  edges.value = all.topology.edges
+  sequence.value = all.sequence
+  legend.value = all.legend
+  selectedIds.value = []
+  singleSelection.value = null
 })
 
 // ----- 选择 -----
@@ -461,7 +502,16 @@ function addMission(kind: NodeKind) {
         label: kindMeta[kind].label || kind.toUpperCase(),
         role: '',
         kind,
-        handles: ['in-top', 'out-bottom', 'in-left', 'out-right']
+        handles: [
+          // 四边中点
+          'in-top', 'out-top', 'in-bottom', 'out-bottom',
+          'in-left', 'out-left', 'in-right', 'out-right',
+          // 四边 1/4 与 3/4 (in/out 各一)
+          'in-top-25',    'out-top-25',    'in-top-75',    'out-top-75',
+          'in-bottom-25', 'out-bottom-25', 'in-bottom-75', 'out-bottom-75',
+          'in-left-25',   'out-left-25',   'in-left-75',   'out-left-75',
+          'in-right-25',  'out-right-25',  'in-right-75',  'out-right-75'
+        ]
       }
     }
   ]
@@ -535,8 +585,8 @@ function patchNodeStyle(id: string, style: Record<string, any>) {
 }
 
 function patchNode(id: string, key: string, value: any) {
-  // 预览中修改气泡 / plan 等字段 → 写入当前 step 的 nodeSettings (保留显式空值)
-  if (previewIdx.value !== null && NODE_OVERRIDE_KEYS.has(key)) {
+  // 预览中修改任何非结构性字段 → 写入当前 step 的 nodeSettings
+  if (previewIdx.value !== null && !NODE_BASE_ONLY.has(key)) {
     const stepIdx = previewIdx.value
     const step = sequence.value[stepIdx]
     if (step) {
@@ -570,13 +620,30 @@ function patchNode(id: string, key: string, value: any) {
     )
   }
 }
-// 可被 step 覆盖的字段
-const STEP_OVERRIDE_KEYS = new Set(['direction', 'glow', 'state'])
-const NODE_OVERRIDE_KEYS = new Set(['message', 'messageIcon', 'messageState', 'plan', 'active', 'flashActive'])
+// 预览某 stage 时，对 node/edge 的 data 做的任何改动全部进入 step override，
+// 该 stage 之外的画面一概不受影响。结构性字段（id / source / target / type）
+// 本就不从 patchEdge / patchNode 流过，无需再单独例外。
+const EDGE_BASE_ONLY: Set<string> = new Set()
+const NODE_BASE_ONLY: Set<string> = new Set()
+
+// 纯"动画态"字段 —— 每个 stage 完全独立；base 上的取值不允许 leak 到 stage。
+// applyStep 会从 baseData 中剥掉这些 key，再把 step override 叠加上去。
+const EDGE_ANIM_ONLY = new Set(['state', 'direction', 'glow'])
+const NODE_ANIM_ONLY = new Set([
+  'active', 'flashActive', 'message', 'messageIcon', 'messageState', 'plan'
+])
+
+function stripKeys<T extends Record<string, any>>(obj: T, keys: Set<string>): T {
+  const out: Record<string, any> = {}
+  for (const k of Object.keys(obj)) {
+    if (!keys.has(k)) out[k] = (obj as any)[k]
+  }
+  return out as T
+}
 
 function patchEdge(id: string, key: string, value: any) {
-  // 预览中修改流向 / 流光 / state → 写入 step.edgeSettings (保留显式空值)
-  if (previewIdx.value !== null && STEP_OVERRIDE_KEYS.has(key)) {
+  // 预览中修改任何字段 → 写入 step.edgeSettings，这个 stage 独立拥有
+  if (previewIdx.value !== null && !EDGE_BASE_ONLY.has(key)) {
     const stepIdx = previewIdx.value
     const step = sequence.value[stepIdx]
     if (step) {
@@ -744,31 +811,47 @@ function updatePos(id: string, pos: { x: number; y: number }) {
 }
 
 // ----- 动作 -----
-function clearCanvas() {
+async function clearCanvas() {
   if (nodes.value.length === 0 && edges.value.length === 0) return
-  if (!confirm('确认清空所有节点和连线？')) return
+  if (!confirm('确认清空所有节点和连线？（立即生效并持久化）')) return
   nodes.value = []; edges.value = []; clearSelection()
+  const view = activeView.value
+  const prev = await fetchRemoteState(view)
+  await saveAll({
+    topology: { nodes: [], edges: [] },
+    sequence: sequence.value,
+    legend:   legend.value,
+    captionTop: typeof prev?.captionTop === 'number' ? prev.captionTop : 40
+  }, view)
+  ElMessage?.success?.(`已清空 · ${viewLabel.value}`)
 }
 
 async function save() {
-  const cleanNodes = nodes.value.map(n => {
-    if (n.type !== 'mission') return { ...n }
-    const { active, flashActive, ...restData } = (n.data || {}) as any
-    return { ...n, data: restData }
+  // 如果正在预览某个 stage，edges.value / nodes.value 已经被 step override 染色了，
+  // 不能直接当 base 存下去——否则"stage 的改动会渗进 base、污染其他 stage"。
+  // 优先从 baseSnapshot 取最干净那份；没有快照说明没在预览中，此时 value 本身就是 base。
+  const sourceNodes = baseSnapshot?.nodes ?? nodes.value
+  const sourceEdges = baseSnapshot?.edges ?? edges.value
+
+  const cleanNodes = sourceNodes.map(n => {
+    if (n.type !== 'mission') return { ...n, data: { ...((n.data || {}) as any) } }
+    const data = stripKeys((n.data || {}) as Record<string, any>, NODE_ANIM_ONLY)
+    return { ...n, data }
   })
-  const cleanEdges = edges.value.map(e => ({
-    ...e,
-    data: { ...((e.data as any) || {}), state: 'idle' }
-  }))
+  const cleanEdges = sourceEdges.map(e => {
+    const data = stripKeys((e.data || {}) as Record<string, any>, EDGE_ANIM_ONLY)
+    return { ...e, data: { ...data, state: 'idle' } }
+  })
   // 保留用户在主页拖拽后的 captionTop
-  const prev = await fetchRemoteState()
+  const view = activeView.value
+  const prev = await fetchRemoteState(view)
   await saveAll({
     topology: { nodes: cleanNodes, edges: cleanEdges },
     sequence: sequence.value,
     legend:   legend.value,
     captionTop: typeof prev?.captionTop === 'number' ? prev.captionTop : 40
-  })
-  ElMessage?.success?.('已保存并应用到首页')
+  }, view)
+  ElMessage?.success?.(`已保存并应用到首页 · ${viewLabel.value}`)
   back()
 }
 function back() { navigateTo('/') }
@@ -871,37 +954,36 @@ function applyStep(step: SequenceStep, idx: number) {
     if (n.type !== 'mission') return { ...n, data: { ...(n.data || {}) } }
     const active = step.nodes.includes(n.id)
     const baseData = (n.data || {}) as any
-    const ov = nodeS[n.id] || {}
-    // 优先 override -> 基础 data -> 默认
+    const baseVisual = stripKeys(baseData, NODE_ANIM_ONLY)
+    const ov = (nodeS[n.id] || {}) as Record<string, any>
+    // 顺序：base 视觉 → stage override（含动画态）→ stage 的 active/flashActive 兜底
     const next: any = {
-      ...baseData,
+      ...baseVisual,
+      ...ov,
       active: ov.active ?? active,
       flashActive: ov.flashActive ?? active
     }
-    if (ov.message !== undefined)      next.message = ov.message
-    if (ov.messageIcon !== undefined)  next.messageIcon = ov.messageIcon
-    if (ov.messageState !== undefined) next.messageState = ov.messageState
-    if ('plan' in ov) {
-      if (ov.plan === null) delete next.plan
-      else next.plan = ov.plan
-    }
+    if ('plan' in ov && ov.plan === null) delete next.plan
     return { ...n, data: next }
   })
   const settings = step.edgeSettings || {}
   edges.value = base.edges.map(e => {
     const baseData = (e.data as any) || {}
-    const override = settings[e.id]
+    const baseVisual = stripKeys(baseData, EDGE_ANIM_ONLY)
+    const override = settings[e.id] as Record<string, any> | undefined
     const highlighted = step.edges.includes(e.id) || !!override
     if (!highlighted) {
-      return { ...e, data: { ...baseData, state: 'idle' } }
+      return { ...e, data: { ...baseVisual, state: 'idle', glow: false } }
     }
     return {
       ...e,
       data: {
-        ...baseData,
-        state: override?.state || 'selected',
-        direction: override?.direction ?? baseData.direction ?? 'forward',
-        glow:      override?.glow      ?? baseData.glow      ?? false
+        ...baseVisual,
+        ...(override || {}),
+        // 动画态字段：只认 step override；base 的取值不 leak
+        state:     override?.state     || 'selected',
+        direction: override?.direction || 'forward',
+        glow:      override?.glow      ?? false
       }
     }
   })
@@ -918,7 +1000,10 @@ function syncPreview(idx: number) {
   playingIdx.value = -1
   if (idx < 0 || idx >= sequence.value.length) return
   previewIdx.value = idx
-  nextTick(() => applyStep(sequence.value[idx], idx))
+  nextTick(() => {
+    applyStep(sequence.value[idx], idx)
+    refreshSelectionFromCanvas()
+  })
 }
 
 function removeFromStage(type: 'node' | 'edge', id: string) {
@@ -971,10 +1056,29 @@ function previewStep(idx: number | null) {
     previewIdx.value = null
     restoreSnapshot()
     clearHighlight()
+    refreshSelectionFromCanvas()
     return
   }
   previewIdx.value = idx
   applyStep(sequence.value[idx], idx)
+  refreshSelectionFromCanvas()
+}
+
+/** 画布重绘后（切预览 / 应用 step / 退出预览）让 Inspector 里选中的对象拿到最新 data */
+function refreshSelectionFromCanvas() {
+  const sel = singleSelection.value
+  if (!sel) return
+  if (sel.type === 'edge') {
+    const id = sel.edge?.id
+    if (!id) return
+    const fresh = edges.value.find(e => e.id === id)
+    if (fresh) singleSelection.value = { type: 'edge', edge: fresh }
+  } else if (sel.type === 'node') {
+    const id = sel.node?.id
+    if (!id) return
+    const fresh = nodes.value.find(n => n.id === id)
+    if (fresh) singleSelection.value = { type: 'node', node: fresh }
+  }
 }
 </script>
 

@@ -47,9 +47,13 @@ export default defineNuxtConfig({
   vite: {
     server: {
       proxy: {
-        // 全部后端路径交给 FastAPI (localhost:8000)
-        '/api':    { target: 'http://localhost:8000', changeOrigin: true },
-        '/stream': { target: 'http://localhost:8000', changeOrigin: true },
+        // 显式列出走 FastAPI 的路径，/api/topology 由 Nuxt Nitro 自己的 server/api 处理
+        '/api/logs':    { target: 'http://localhost:8000', changeOrigin: true },
+        '/api/metrics': { target: 'http://localhost:8000', changeOrigin: true },
+        '/api/v1':      { target: 'http://localhost:8000', changeOrigin: true },
+        '/api/stage':   { target: 'http://localhost:8000', changeOrigin: true },
+        '/api/webrtc':  { target: 'http://localhost:8000', changeOrigin: true },
+        '/stream':      { target: 'http://localhost:8000', changeOrigin: true },
       }
     }
   }

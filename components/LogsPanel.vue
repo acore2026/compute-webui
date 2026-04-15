@@ -2,22 +2,17 @@
   <section class="panel flex flex-col h-full overflow-hidden">
     <div class="panel-header">
       <div class="flex items-center gap-2">
-        <span class="title-kicker">Telemetry</span>
-        <span>{{ tab === 'logs' ? '流程日志' : '状态指标' }}</span>
+        <span>状态监控</span>
       </div>
-      <!-- 自定义 Tabs，对齐 §3.4 -->
-      <div class="flex items-center gap-1.5">
+      <!-- 5 个切换按钮，右对齐 -->
+      <div class="flex items-center gap-1.5 flex-wrap">
         <button
-          :class="['sidebar-tab', tab === 'logs' && 'sidebar-tab-active']"
-          @click="tab = 'logs'"
+          v-for="t in tabs"
+          :key="t.id"
+          :class="['sidebar-tab', tab === t.id && 'sidebar-tab-active']"
+          @click="tab = t.id"
         >
-          日志
-        </button>
-        <button
-          :class="['sidebar-tab', tab === 'metrics' && 'sidebar-tab-active']"
-          @click="tab = 'metrics'"
-        >
-          指标
+          {{ t.label }}
         </button>
       </div>
     </div>
@@ -41,28 +36,9 @@
         </div>
       </div>
 
-      <!-- 指标 -->
-      <div v-show="tab === 'metrics'" class="h-full overflow-y-auto scrollbar-thin p-4 grid grid-cols-2 gap-3">
-        <div v-for="m in metrics" :key="m.label" class="metric-card">
-          <div class="metric-label">{{ m.label }}</div>
-          <div class="flex items-baseline mt-1">
-            <span class="metric-value tabular-nums">{{ m.value }}</span>
-            <span class="metric-unit">{{ m.unit }}</span>
-          </div>
-          <div
-            class="mt-3 rounded-full overflow-hidden"
-            style="height: 6px; background: rgba(148, 163, 184, 0.18);"
-          >
-            <div
-              class="h-full rounded-full transition-all duration-500"
-              :style="{ width: m.percent + '%', background: m.color }"
-            ></div>
-          </div>
-          <div class="mt-2 flex items-center justify-between" style="font-size: 0.68rem; color: #64748b; font-weight: 600;">
-            <span class="font-mono tracking-wider">{{ m.percent }}%</span>
-            <span class="font-mono">{{ m.trend }}</span>
-          </div>
-        </div>
+      <!-- 指标曲线（按当前 tab 渲染单个指标） -->
+      <div v-if="tab !== 'logs'" class="h-full">
+        <MetricsChartPanel :metric="tab" />
       </div>
     </div>
   </section>
@@ -144,7 +120,17 @@
 <script setup lang="ts">
 interface LogItem { id: number; time: string; level: 'INFO' | 'WARN' | 'ERROR' | 'OK'; message: string }
 
-const tab = ref<'logs' | 'metrics'>('logs')
+type TabId = 'logs' | 'e2e' | 'jitter' | 'compute' | 'fps'
+
+const tabs: { id: TabId; label: string }[] = [
+  { id: 'logs',    label: '流程日志'     },
+  { id: 'e2e',     label: 'E2E latency' },
+  { id: 'jitter',  label: 'Jitter'      },
+  { id: 'compute', label: 'Comp latency'},
+  { id: 'fps',     label: 'FPS'         }
+]
+
+const tab = ref<TabId>('logs')
 const logs = ref<LogItem[]>([])
 let counter = 0
 let timer: ReturnType<typeof setInterval> | null = null
@@ -189,13 +175,6 @@ function pushLog() {
   })
   if (logs.value.length > 200) logs.value.pop()
 }
-
-const metrics = ref([
-  { label: 'FPS',         value: 25.6, unit: 'f/s',    percent: 64, color: '#3b82f6', trend: '↗ +1.2' },
-  { label: '推理延迟',    value: 42,   unit: 'ms',     percent: 35, color: '#10b981', trend: '↘ -3' },
-  { label: 'GPU 使用率',  value: 78,   unit: '%',      percent: 78, color: '#f59e0b', trend: '↗ +5' },
-  { label: '队列积压',    value: 6,    unit: 'frames', percent: 20, color: '#7c3aed', trend: '→ 0' }
-])
 
 onMounted(() => {
   for (let i = 0; i < 6; i++) pushLog()

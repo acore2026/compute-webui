@@ -1,11 +1,13 @@
 """
 Webfront backend — FastAPI
 ==========================
-职责：
-  1. /api/state     架构图 / 序列 / 图例 / caption 位置 持久化 (JSON 文件)
-  2. /api/logs      流程日志 (当前为模拟数据；后续替换为真实日志源)
-  3. /api/metrics   实时指标 (当前为模拟数据)
-  4. /stream/video  实时视频 (占位，等硬件/推流接入)
+职责（只负责运行时数据；架构图配置已迁到前端仓 data/topology/）：
+  1. /api/stage/*              当前 Stage 广播（SSE 推送）— 核心用途
+  2. /api/v1/metrics/history   指标历史曲线（模拟数据）
+  3. /api/metrics              实时指标（单点 mock，legacy）
+  4. /api/logs                 流程日志（模拟数据）
+  5. /api/webrtc/offer         WebRTC 视频流
+  6. /health                   健康检查
 
 启动：
   python -m pip install -r requirements.txt
@@ -44,41 +46,11 @@ app.add_middleware(
 )
 
 # ============================================================
-# 持久化目录
+# 持久化目录 — 仅 webfront 可能写的少量状态（目前为空，保留占位）
+# 架构图配置已迁移到前端仓 data/topology/*.json，由 Nuxt server route 管理。
 # ============================================================
 DATA_DIR = Path(__file__).parent / "data"
-STATE_FILE = DATA_DIR / "state.json"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
-
-
-# ============================================================
-# /api/state — 架构图配置读写
-# ============================================================
-@app.get("/api/state")
-def get_state() -> dict:
-    """读取保存的配置；首次无文件时返回默认空值"""
-    if STATE_FILE.exists():
-        try:
-            return json.loads(STATE_FILE.read_text(encoding="utf-8"))
-        except Exception:
-            pass
-    return {
-        "topology": None,
-        "sequence": [],
-        "legend": None,
-        "captionTop": 40,
-    }
-
-
-@app.post("/api/state")
-async def post_state(request: Request) -> dict:
-    """整份覆盖写回。前端应传 {topology, sequence, legend, captionTop}。"""
-    body = await request.json()
-    STATE_FILE.write_text(
-        json.dumps(body, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-    return {"ok": True}
 
 
 # ============================================================
@@ -93,6 +65,36 @@ def metrics() -> dict:
         "queue":      random.randint(0, 15),
         "ts":         datetime.now().isoformat(timespec="seconds"),
     }
+
+
+# ============================================================
+# /api/v1/metrics/history — 指标历史曲线 (示例数据)
+# 前端 composables/useMetricsHistory.ts 消费本接口
+# ============================================================
+@app.get("/api/v1/metrics/history")
+def metrics_history(time_window: int = 300) -> dict:
+    """返回过去 time_window 秒的采样点（每秒一条，模拟数据）。"""
+    window = max(1, min(int(time_window), 3600))
+    now_ts = int(datetime.now().timestamp())
+    start_ts = now_ts - window + 1
+
+    samples = []
+    for ts in range(start_ts, now_ts + 1):
+        compute = round(3.5 + random.random() * 3.0, 2)
+        processing = round(3.0 + random.random() * 2.5, 2)
+        jitter = round(0.5 + random.random() * 2.5, 2)
+        e2e = round(compute + processing + jitter + random.random() * 1.5, 2)
+        fps = 30 if random.random() > 0.08 else 30 - random.randint(1, 4)
+        samples.append({
+            "timestamp":             ts,
+            "e2e_latency_ms":        e2e,
+            "jitter_ms":             jitter,
+            "compute_latency_ms":    compute,
+            "processing_latency_ms": processing,
+            "fps":                   fps,
+        })
+
+    return {"status": "SUCCESS", "metrics": samples}
 
 
 # ============================================================

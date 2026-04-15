@@ -1,16 +1,28 @@
 import type { Node, Edge } from '@vue-flow/core'
 
-const LS_TOPO   = 'webfront.topology.v1'
-const LS_SEQ    = 'webfront.sequence.v1'
-const LS_LEGEND = 'webfront.legend.v1'
+export type ViewId = 'public-cloud' | 'core-network'
+export const VIEW_IDS: ViewId[] = ['public-cloud', 'core-network']
+export const DEFAULT_VIEW: ViewId = 'core-network'
 
+/**
+ * 设计：每个 step 对自己涉及的 node/edge 可以完全独立覆盖 data 上任意字段。
+ * 下面列出的是"常见的"覆盖字段，便于 IDE 提示，但接口用 [extra] 索引签名开放给
+ * 任何新字段——以后新增任何视觉 / 状态属性自动 per-stage 生效，不需要改类型。
+ *
+ * 真正必须 base 共享的结构性字段（kind / plane / label）不通过 override 写入，
+ * 由编辑器的 EDGE_BASE_ONLY / NODE_BASE_ONLY 集合控制。
+ */
 export interface EdgeOverride {
-  /** 该 step 下这条边的流向 (覆盖 Inspector 设置) */
   direction?: 'forward' | 'reverse' | 'bidirectional'
-  /** 该 step 下是否开启流光 (覆盖) */
   glow?: boolean
-  /** 状态 (默认 'selected', 可选 'active') */
   state?: 'selected' | 'active' | 'idle'
+  tone?: string
+  lineColor?: string
+  lineWidth?: number
+  lineOpacity?: number
+  pathType?: string
+  note?: string
+  [extra: string]: unknown
 }
 
 export type BubbleIcon =
@@ -29,14 +41,14 @@ export interface NodePlan {
   items: PlanItem[]
 }
 
-/** 每个 step 下某节点的气泡 / 清单 覆盖 */
 export interface NodeOverride {
   message?: string
   messageIcon?: BubbleIcon
   messageState?: BubbleState
-  plan?: NodePlan | null   // null = 清除 plan
+  plan?: NodePlan | null
   active?: boolean
   flashActive?: boolean
+  [extra: string]: unknown
 }
 
 export interface SequenceStep {
@@ -47,7 +59,6 @@ export interface SequenceStep {
   nodes: string[]
   edges: string[]
   edgeSettings?: Record<string, EdgeOverride>
-  /** 每个高亮节点在本 step 的气泡 / plan 覆盖 */
   nodeSettings?: Record<string, NodeOverride>
 }
 
@@ -69,71 +80,12 @@ export interface LegendConfig {
 
 export const DEFAULT_LEGEND: LegendConfig = { visible: false, items: [] }
 
-/** 默认空白 — 所有节点 / 边 / 序列都由用户自行创建 */
 export const EMPTY_TOPOLOGY: Topology = { nodes: [], edges: [] }
 
-export function loadTopology(): Topology {
-  if (typeof window === 'undefined') return { nodes: [], edges: [] }
-  try {
-    const raw = localStorage.getItem(LS_TOPO)
-    if (!raw) return { nodes: [], edges: [] }
-    const p = JSON.parse(raw) as Topology
-    if (!Array.isArray(p.nodes) || !Array.isArray(p.edges)) throw new Error('invalid')
-    return p
-  } catch {
-    return { nodes: [], edges: [] }
-  }
-}
-
-export function saveTopology(t: Topology) {
-  if (typeof window === 'undefined') return
-  localStorage.setItem(LS_TOPO, JSON.stringify(t))
-}
-
-export function loadSequence(): SequenceStep[] {
-  if (typeof window === 'undefined') return []
-  try {
-    const raw = localStorage.getItem(LS_SEQ)
-    if (!raw) return []
-    const parsed = JSON.parse(raw)
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
-}
-
-export function saveSequence(seq: SequenceStep[]) {
-  if (typeof window === 'undefined') return
-  localStorage.setItem(LS_SEQ, JSON.stringify(seq))
-}
-
-export function loadLegend(): LegendConfig {
-  if (typeof window === 'undefined') return { ...DEFAULT_LEGEND }
-  try {
-    const raw = localStorage.getItem(LS_LEGEND)
-    if (!raw) return { ...DEFAULT_LEGEND }
-    const p = JSON.parse(raw)
-    if (typeof p?.visible !== 'boolean' || !Array.isArray(p?.items)) return { ...DEFAULT_LEGEND }
-    return p
-  } catch {
-    return { ...DEFAULT_LEGEND }
-  }
-}
-
-export function saveLegend(cfg: LegendConfig) {
-  if (typeof window === 'undefined') return
-  localStorage.setItem(LS_LEGEND, JSON.stringify(cfg))
-}
-
-export function resetAll() {
-  if (typeof window === 'undefined') return
-  localStorage.removeItem(LS_TOPO)
-  localStorage.removeItem(LS_SEQ)
-  localStorage.removeItem(LS_LEGEND)
-}
-
 /* ============================================================
-   Server-side 持久化：写入 data/state.json 跨端口 / 跨浏览器保留
+   数据源：前端代码仓下的 data/topology/<view>.json
+   通过 Nuxt server route /api/topology 读写，不再走 Python 后端，
+   也不再使用 localStorage。
    ============================================================ */
 export interface RemoteState {
   topology: Topology | null
@@ -142,57 +94,36 @@ export interface RemoteState {
   captionTop?: number
 }
 
-export async function fetchRemoteState(): Promise<RemoteState | null> {
+export async function fetchRemoteState(view: ViewId = DEFAULT_VIEW): Promise<RemoteState | null> {
   try {
-    return await $fetch<RemoteState>('/api/state')
+    return await $fetch<RemoteState>(`/api/topology?view=${view}`)
   } catch {
     return null
   }
 }
 
-export async function pushRemoteState(state: RemoteState) {
+export async function pushRemoteState(state: RemoteState, view: ViewId = DEFAULT_VIEW) {
   try {
-    await $fetch('/api/state', { method: 'POST', body: state })
+    await $fetch(`/api/topology?view=${view}`, { method: 'POST', body: state })
   } catch (e) {
-    console.warn('[storage] server push failed', e)
+    console.warn('[topology] save failed', e)
   }
 }
 
-/** 异步加载：优先 server，失败回退 localStorage */
-export async function loadAll(): Promise<{
+export async function loadAll(view: ViewId = DEFAULT_VIEW): Promise<{
   topology: Topology
   sequence: SequenceStep[]
   legend: LegendConfig
   captionTop: number
 }> {
-  const remote = await fetchRemoteState()
-  if (remote?.topology) {
-    if (typeof window !== 'undefined') {
-      saveTopology(remote.topology)
-      if (remote.sequence) saveSequence(remote.sequence)
-      if (remote.legend)   saveLegend(remote.legend)
-    }
-    return {
-      topology: remote.topology,
-      sequence: remote.sequence || [],
-      legend:   remote.legend  || { ...DEFAULT_LEGEND },
-      captionTop: typeof remote.captionTop === 'number' ? remote.captionTop : 40
-    }
-  }
-  return {
-    topology: loadTopology(),
-    sequence: loadSequence(),
-    legend:   loadLegend(),
-    captionTop: 40
-  }
+  const remote = await fetchRemoteState(view)
+  const topology  = remote?.topology  ?? { nodes: [], edges: [] }
+  const sequence  = remote?.sequence  ?? []
+  const legendCfg = remote?.legend    ?? { ...DEFAULT_LEGEND }
+  const captionTop = typeof remote?.captionTop === 'number' ? remote.captionTop : 40
+  return { topology, sequence, legend: legendCfg, captionTop }
 }
 
-/** 保存到 server + localStorage */
-export async function saveAll(state: RemoteState) {
-  if (state.topology) saveTopology(state.topology)
-  saveSequence(state.sequence)
-  if (state.legend)   saveLegend(state.legend)
-  await pushRemoteState(state)
+export async function saveAll(state: RemoteState, view: ViewId = DEFAULT_VIEW) {
+  await pushRemoteState(state, view)
 }
-
-export { pushRemoteState as _pushRemoteState, fetchRemoteState as _fetchRemoteState }
