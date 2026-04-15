@@ -1,0 +1,1049 @@
+<template>
+  <ClientOnly>
+  <div class="editor-shell h-[calc(100vh-4rem-2rem)] flex flex-col gap-3">
+    <!-- 顶部操作栏 -->
+    <div class="panel flex items-center justify-between px-4 py-2.5">
+      <div class="flex items-center gap-3">
+        <button class="icon-button icon-button-sm" @click="back" title="返回首页">
+          <el-icon :size="14"><Back /></el-icon>
+        </button>
+        <div class="flex flex-col leading-tight">
+          <span style="font-size:0.72rem; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#0369a1;">
+            Architecture Editor
+          </span>
+          <span style="font-size:0.92rem; font-weight:700;">架构图编辑器</span>
+        </div>
+        <span class="status-badge status-badge-idle ml-2">
+          <span class="status-badge-icon"></span>
+          {{ nodes.length }} Nodes · {{ edges.length }} Edges
+        </span>
+        <span v-if="selectedIds.length > 1" class="status-badge status-badge-live">
+          <span class="status-badge-icon"></span>
+          已选 {{ selectedIds.length }} 项
+        </span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <!-- Snap Grid Toggle -->
+        <button
+          :class="['icon-button', snap && 'is-on']"
+          style="width:auto; padding:0 12px; gap:6px;"
+          @click="snap = !snap"
+          :title="snap ? '关闭网格吸附' : '打开网格吸附'"
+        >
+          <el-icon :size="14"><Grid /></el-icon>
+          <span style="font-size:0.74rem; font-weight:600;">吸附 {{ snap ? 'ON' : 'OFF' }}</span>
+        </button>
+        <button class="icon-button" style="width:auto; padding:0 14px; gap:6px;" @click="openIo('export')">
+          <el-icon :size="14"><Download /></el-icon>
+          <span style="font-size:0.78rem; font-weight:600;">导出</span>
+        </button>
+        <button class="icon-button" style="width:auto; padding:0 14px; gap:6px;" @click="openIo('import')">
+          <el-icon :size="14"><Upload /></el-icon>
+          <span style="font-size:0.78rem; font-weight:600;">导入</span>
+        </button>
+        <button class="icon-button" style="width:auto; padding:0 14px; gap:6px;" @click="clearCanvas">
+          <el-icon :size="14"><Delete /></el-icon>
+          <span style="font-size:0.78rem; font-weight:600;">清空</span>
+        </button>
+        <button class="primary-button" @click="save">
+          <el-icon :size="14"><Check /></el-icon>
+          保存并应用
+        </button>
+      </div>
+    </div>
+
+    <!-- 对齐工具栏 (多选时出现) -->
+    <div
+      v-if="selectedIds.length >= 2"
+      class="panel flex items-center gap-2 px-4 py-2"
+    >
+      <span class="text-[0.62rem] font-bold tracking-wider uppercase text-ink-500">Align</span>
+      <div class="flex items-center gap-1">
+        <button class="icon-button icon-button-sm" @click="align('left')" title="左对齐">
+          <el-icon :size="14"><AlignLeft /></el-icon>
+        </button>
+        <button class="icon-button icon-button-sm" @click="align('centerX')" title="水平居中">
+          <el-icon :size="14"><AlignCenterH /></el-icon>
+        </button>
+        <button class="icon-button icon-button-sm" @click="align('right')" title="右对齐">
+          <el-icon :size="14"><AlignRight /></el-icon>
+        </button>
+        <span class="mx-2 w-px h-5 bg-ink-200"></span>
+        <button class="icon-button icon-button-sm" @click="align('top')" title="顶部对齐">
+          <el-icon :size="14"><AlignTop /></el-icon>
+        </button>
+        <button class="icon-button icon-button-sm" @click="align('centerY')" title="垂直居中">
+          <el-icon :size="14"><AlignCenterV /></el-icon>
+        </button>
+        <button class="icon-button icon-button-sm" @click="align('bottom')" title="底部对齐">
+          <el-icon :size="14"><AlignBottom /></el-icon>
+        </button>
+      </div>
+      <span class="text-[0.62rem] font-bold tracking-wider uppercase text-ink-500 ml-3">Distribute</span>
+      <div class="flex items-center gap-1">
+        <button
+          class="icon-button icon-button-sm"
+          :disabled="selectedIds.length < 3"
+          @click="distribute('h')"
+          title="水平等距分布"
+        >
+          <el-icon :size="14"><DArrowRight /></el-icon>
+        </button>
+        <button
+          class="icon-button icon-button-sm"
+          :disabled="selectedIds.length < 3"
+          @click="distribute('v')"
+          title="垂直等距分布"
+        >
+          <el-icon :size="14"><Bottom /></el-icon>
+        </button>
+      </div>
+      <span class="text-[0.62rem] font-bold tracking-wider uppercase text-ink-500 ml-3">Snap</span>
+      <button
+        class="icon-button icon-button-sm"
+        style="width:auto; padding:0 10px;"
+        @click="snapSelectedToGrid"
+        title="将选中对齐到网格"
+      >
+        <span style="font-size:0.7rem; font-weight:600;">对齐到网格</span>
+      </button>
+    </div>
+
+    <!-- 主体 -->
+    <div class="flex-1 grid gap-3 min-h-0" style="grid-template-columns: 220px 1fr 380px;">
+      <NodeToolbox
+        :legend="legend"
+        @add-mission="addMission"
+        @add-region="addRegion"
+        @add-bus="addBus"
+        @add-bar="addBar"
+        @clear="clearCanvas"
+        @update-legend="legend = $event"
+      />
+
+      <!-- 画布 -->
+      <section class="panel flex flex-col overflow-hidden relative">
+        <div class="panel-header">
+          <div class="flex items-center gap-2">
+            <span class="title-kicker">Canvas</span>
+            <span>自由绘制 · 拖拽 · 双击改名</span>
+          </div>
+          <div class="flex items-center gap-3 text-[0.7rem] text-ink-500">
+            <span class="flex items-center gap-1.5">
+              <span class="w-2.5 h-0.5" style="background:#7c3aed;"></span>控制
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span class="w-2.5 h-0.5" style="background:#f59e0b;"></span>数据
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span class="w-2.5 h-0.5" style="background:#0284c7;"></span>无线
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span class="w-2.5 h-0.5" style="background:#38bdf8;"></span>总线
+            </span>
+          </div>
+        </div>
+
+        <div class="flex-1 relative editor-canvas">
+          <!-- 空画布提示 -->
+          <div
+            v-if="nodes.length === 0"
+            class="absolute inset-0 grid place-items-center pointer-events-none z-10"
+          >
+            <div class="text-center pointer-events-auto">
+              <div
+                class="w-14 h-14 rounded-full grid place-items-center mx-auto mb-3"
+                style="background: rgba(59, 130, 246, 0.10);"
+              >
+                <el-icon :size="28" color="#3b82f6"><Plus /></el-icon>
+              </div>
+              <div style="font-size: 0.82rem; font-weight: 700;">空白画布</div>
+              <div class="mt-1 text-ink-500" style="font-size: 0.72rem;">
+                从左侧工具箱添加节点开始
+              </div>
+            </div>
+          </div>
+
+          <!-- 连线操作引导（≥2 节点、0 边时显示） -->
+          <div
+            v-if="nodes.length >= 2 && edges.length === 0"
+            class="absolute top-14 left-1/2 -translate-x-1/2 z-20 pointer-events-none"
+            style="
+              background: rgba(255, 255, 255, 0.95);
+              border: 1px solid rgba(59, 130, 246, 0.35);
+              border-radius: 10px;
+              padding: 8px 14px;
+              box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
+              font-size: 0.74rem;
+              font-weight: 600;
+              color: #1e3a8a;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            "
+          >
+            <span class="w-2.5 h-2.5 rounded-full" style="background:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,0.22);"></span>
+            鼠标悬停节点 → 从边缘的
+            <span style="color:#3b82f6; font-weight:800;">蓝色圆点</span>
+            按住拖到另一个节点的圆点
+          </div>
+
+          <VueFlow
+            v-model:nodes="nodes"
+            v-model:edges="edges"
+            :node-types="nodeTypes"
+            :edge-types="edgeTypes"
+            :default-viewport="{ x: 0, y: 0, zoom: 1 }"
+            :min-zoom="0.3"
+            :max-zoom="2.4"
+            :connection-mode="ConnectionMode.Loose"
+            :snap-to-grid="snap"
+            :snap-grid="[20, 20]"
+            :nodes-draggable="true"
+            :nodes-connectable="true"
+            :elements-selectable="true"
+            :elevate-nodes-on-select="false"
+            :elevate-edges-on-select="false"
+            :multi-selection-key-code="'Shift'"
+            :selection-key-code="'Shift'"
+            class="!bg-white"
+            @connect="onConnect"
+            @node-click="onNodeClick"
+            @node-double-click="onNodeDoubleClick"
+            @edge-click="onEdgeClick"
+            @pane-click="onPaneClick"
+          >
+            <Background
+              :gap="snap ? 20 : 40"
+              :size="1"
+              :pattern-color="snap ? '#e2e8f0' : '#f1f5f9'"
+            />
+            <MiniMap pannable zoomable mask-color="rgba(241,245,249,0.7)" />
+            <Controls />
+          </VueFlow>
+
+          <div
+            class="absolute top-3 right-3 text-[0.66rem] font-mono px-2.5 py-1 rounded-full"
+            style="background:rgba(255,255,255,0.92); border:1px solid var(--color-border); color:#475569;"
+          >
+            <span style="color:#3b82f6; font-weight:700;">●</span>
+            从蓝点拖出连线 · Shift 多选 · 双击改名
+          </div>
+
+          <!-- 图例预览 -->
+          <div v-if="legend.visible && legend.items.length" class="canvas-legend">
+            <span
+              v-for="item in legend.items"
+              :key="item.id"
+              class="canvas-legend-pill"
+              :style="{ '--lg-color': item.color } as any"
+            >
+              {{ item.label }}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 右侧竖排：Inspector + Sequence Builder -->
+      <div class="grid gap-3 min-h-0" style="grid-template-rows: 1fr 1fr;">
+        <Inspector
+          :selection="singleSelection"
+          :preview-idx="previewIdx"
+          class="min-h-0"
+          @patch-node="patchNode"
+          @patch-node-style="patchNodeStyle"
+          @patch-edge="patchEdge"
+          @rename-node="renameNode"
+          @rename-edge="renameEdge"
+          @delete-node="deleteNode"
+          @delete-edge="deleteEdge"
+          @remove-from-stage="removeFromStage"
+          @deselect="clearSelection"
+        />
+        <SequenceBuilder
+          :steps="sequence"
+          :node-ids="missionNodeIds"
+          :edge-ids="edgeIds"
+          :playing-idx="playingIdx"
+          :preview-idx="previewIdx"
+          :collapsed="seqCollapsed"
+          class="min-h-0"
+          @update:steps="sequence = $event"
+          @play="playSequence"
+          @toggle="seqCollapsed = !seqCollapsed"
+          @preview="previewStep"
+          @sync-preview="syncPreview"
+          @focus="focusElement"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- JSON 导入/导出 Modal -->
+  <div v-if="ioMode" class="io-backdrop" @click.self="ioMode = null">
+    <div class="io-modal panel">
+      <div class="panel-header">
+        <div class="flex items-center gap-2">
+          <span class="title-kicker">{{ ioMode === 'export' ? 'Export' : 'Import' }}</span>
+          <span>{{ ioMode === 'export' ? '导出流程图 JSON' : '导入流程图 JSON' }}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            v-if="ioMode === 'export'"
+            class="icon-button icon-button-sm"
+            @click="copyIoText"
+            title="复制到剪贴板"
+          >
+            <el-icon :size="14"><CopyDocument /></el-icon>
+          </button>
+          <button class="close-button" @click="ioMode = null" title="关闭">
+            <el-icon :size="14"><Delete /></el-icon>
+          </button>
+        </div>
+      </div>
+      <div class="io-body">
+        <textarea
+          v-model="ioText"
+          class="io-textarea"
+          :readonly="ioMode === 'export'"
+          :placeholder="ioMode === 'import' ? '粘贴 { nodes, edges, sequence?, legend? } 的 JSON …' : ''"
+          spellcheck="false"
+        ></textarea>
+        <div v-if="ioError" class="io-error">{{ ioError }}</div>
+      </div>
+      <div class="io-footer">
+        <button class="icon-button" style="width:auto; padding:0 14px;" @click="ioMode = null">取消</button>
+        <button v-if="ioMode === 'import'" class="primary-button" @click="applyImport">
+          <el-icon :size="14"><Check /></el-icon>
+          应用
+        </button>
+      </div>
+    </div>
+  </div>
+  </ClientOnly>
+</template>
+
+<script setup lang="ts">
+import { computed, markRaw, nextTick, onMounted, ref } from 'vue'
+import { VueFlow, ConnectionMode, type Node, type Edge, type Connection } from '@vue-flow/core'
+import { Background } from '@vue-flow/background'
+import { Controls } from '@vue-flow/controls'
+import { MiniMap } from '@vue-flow/minimap'
+import {
+  Back, Check, Delete, Plus, Grid,
+  Bottom, DArrowRight, Download, Upload, CopyDocument
+} from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+
+// 对齐图标 (lucide)
+import {
+  AlignLeft, AlignRight,
+  AlignHorizontalJustifyCenter as AlignCenterH,
+  AlignVerticalJustifyCenter  as AlignCenterV,
+  AlignStartVertical          as AlignTop,
+  AlignEndVertical            as AlignBottom
+} from 'lucide-vue-next'
+
+import MissionNode from '~/components/flow/MissionNode.vue'
+import MissionEdge from '~/components/flow/MissionEdge.vue'
+import RegionNode from '~/components/flow/RegionNode.vue'
+import BusNode from '~/components/flow/BusNode.vue'
+import BarNode from '~/components/flow/BarNode.vue'
+import NodeToolbox from '~/components/editor/NodeToolbox.vue'
+import Inspector, { type Selection } from '~/components/editor/Inspector.vue'
+import SequenceBuilder from '~/components/editor/SequenceBuilder.vue'
+import { kindMeta, type NodeKind } from '~/components/flow/kindMeta'
+import {
+  loadAll, saveAll, fetchRemoteState,
+  DEFAULT_LEGEND,
+  type SequenceStep, type LegendConfig
+} from '~/components/flow/storage'
+
+const nodeTypes = {
+  mission: markRaw(MissionNode),
+  region:  markRaw(RegionNode),
+  bus:     markRaw(BusNode),
+  bar:     markRaw(BarNode)
+}
+const edgeTypes = { mission: markRaw(MissionEdge) }
+
+const nodes = ref<Node[]>([])
+const edges = ref<Edge[]>([])
+const sequence = ref<SequenceStep[]>([])
+const snap = ref(true)
+const playingIdx = ref(-1)
+const previewIdx = ref<number | null>(null)
+const seqCollapsed = ref(false)
+const legend = ref<LegendConfig>({ ...DEFAULT_LEGEND })
+
+// 选择状态
+const selectedIds = ref<string[]>([])
+const singleSelection = ref<Selection | null>(null)
+
+const missionNodeIds = computed(() => nodes.value.filter(n => n.type === 'mission').map(n => n.id))
+const edgeIds = computed(() => edges.value.map(e => e.id))
+
+onMounted(async () => {
+  const all = await loadAll()
+  nodes.value = all.topology.nodes
+  edges.value = all.topology.edges
+  sequence.value = all.sequence
+  legend.value = all.legend
+})
+
+// ----- 选择 -----
+function onNodeClick(e: { event: MouseEvent; node: Node }) {
+  const { event, node } = e
+  if (event?.shiftKey) {
+    if (!selectedIds.value.includes(node.id)) selectedIds.value = [...selectedIds.value, node.id]
+    singleSelection.value = null
+  } else {
+    selectedIds.value = [node.id]
+    singleSelection.value = { type: 'node', node }
+  }
+}
+function onNodeDoubleClick(e: { node: Node }) {
+  selectedIds.value = [e.node.id]
+  singleSelection.value = { type: 'node', node: e.node }
+  // 延迟让 Inspector 渲染后聚焦 label 输入
+  nextTick(() => {
+    const input = document.querySelector<HTMLInputElement>('.field .settings-input')
+    input?.focus(); input?.select()
+  })
+}
+function onEdgeClick(e: { edge: Edge }) {
+  selectedIds.value = []
+  singleSelection.value = { type: 'edge', edge: e.edge }
+}
+function onPaneClick() { clearSelection() }
+function clearSelection() {
+  selectedIds.value = []
+  singleSelection.value = null
+}
+
+// ----- 连线 -----
+function onConnect(conn: Connection) {
+  const id = `e-${conn.source}-${conn.target}-${Date.now().toString(36)}`
+  edges.value = [
+    ...edges.value,
+    {
+      id, source: conn.source!, target: conn.target!,
+      sourceHandle: conn.sourceHandle || undefined,
+      targetHandle: conn.targetHandle || undefined,
+      type: 'mission',
+      data: { kind: 'baseline', state: 'idle', pathType: 'bezier' }
+    }
+  ]
+  invalidateSnapshot()
+}
+
+// ----- 添加节点 -----
+function uniqueId(prefix: string) {
+  let i = 1
+  while (nodes.value.find(n => n.id === `${prefix}-${i}`)) i++
+  return `${prefix}-${i}`
+}
+function snapTo(v: number) { return snap.value ? Math.round(v / 20) * 20 : v }
+
+function addMission(kind: NodeKind) {
+  const id = uniqueId(kind)
+  const baseX = 160 + (nodes.value.filter(n => n.type === 'mission').length % 5) * 180
+  const baseY = 120 + Math.floor(nodes.value.filter(n => n.type === 'mission').length / 5) * 120
+  nodes.value = [
+    ...nodes.value,
+    {
+      id, type: 'mission',
+      position: { x: snapTo(baseX), y: snapTo(baseY) },
+      style: { width: '140px' },
+      zIndex: 10,
+      data: {
+        label: kindMeta[kind].label || kind.toUpperCase(),
+        role: '',
+        kind,
+        handles: ['in-top', 'out-bottom', 'in-left', 'out-right']
+      }
+    }
+  ]
+  invalidateSnapshot()
+}
+function addRegion(variant: 'default' | 'external' | 'mno' | 'access') {
+  const id = uniqueId(`region-${variant}`)
+  nodes.value = [
+    ...nodes.value,
+    {
+      id, type: 'region',
+      position: { x: snapTo(60), y: snapTo(60) },
+      style: { width: '420px', height: '240px' },
+      zIndex: 0,
+      data: { label: `REGION · ${variant.toUpperCase()}`, variant }
+    }
+  ]
+  invalidateSnapshot()
+}
+function addBus() {
+  const id = uniqueId('bus')
+  nodes.value = [
+    ...nodes.value,
+    {
+      id, type: 'bus',
+      position: { x: snapTo(200), y: snapTo(220) },
+      style: { width: '440px', height: '24px' },
+      zIndex: 2,
+      data: { label: 'AGENT BUS' }
+    }
+  ]
+  invalidateSnapshot()
+}
+function addBar() {
+  const id = uniqueId('bar')
+  const baseX = 160 + (nodes.value.filter(n => n.type === 'mission' || n.type === 'bar').length % 5) * 180
+  const baseY = 120 + Math.floor(nodes.value.filter(n => n.type === 'mission' || n.type === 'bar').length / 5) * 120
+  nodes.value = [
+    ...nodes.value,
+    {
+      id, type: 'bar',
+      position: { x: snapTo(baseX), y: snapTo(baseY) },
+      style: { width: '140px', height: '28px' },
+      zIndex: 10,
+      data: { color: '#64748b', height: 8 }
+    }
+  ]
+  invalidateSnapshot()
+}
+
+// ----- Patch -----
+function patchNodeStyle(id: string, style: Record<string, any>) {
+  const merge = (old: any) => {
+    const m = { ...(old || {}), ...style }
+    Object.keys(style).forEach(k => { if (style[k] === undefined) delete m[k] })
+    return m
+  }
+  nodes.value = nodes.value.map(n => {
+    if (n.id !== id) return n
+    const next = { ...n, style: merge(n.style) }
+    if (singleSelection.value?.type === 'node' && singleSelection.value.node?.id === id) {
+      singleSelection.value = { type: 'node', node: next }
+    }
+    return next
+  })
+  if (baseSnapshot) {
+    baseSnapshot.nodes = baseSnapshot.nodes.map(n =>
+      n.id === id ? { ...n, style: merge(n.style) } : n
+    )
+  }
+}
+
+function patchNode(id: string, key: string, value: any) {
+  // 预览中修改气泡 / plan 等字段 → 写入当前 step 的 nodeSettings (保留显式空值)
+  if (previewIdx.value !== null && NODE_OVERRIDE_KEYS.has(key)) {
+    const stepIdx = previewIdx.value
+    const step = sequence.value[stepIdx]
+    if (step) {
+      const curOv = step.nodeSettings?.[id] || {}
+      const newOv: any = { ...curOv, [key]: value }
+      const map = { ...(step.nodeSettings || {}), [id]: newOv }
+      const newNodes = step.nodes.includes(id) ? step.nodes : [...step.nodes, id]
+      const newSeq = sequence.value.slice()
+      newSeq[stepIdx] = { ...step, nodes: newNodes, nodeSettings: map }
+      sequence.value = newSeq
+      applyStep(sequence.value[stepIdx], stepIdx)
+      const updated = nodes.value.find(n => n.id === id)
+      if (updated && singleSelection.value?.type === 'node' && singleSelection.value.node?.id === id) {
+        singleSelection.value = { type: 'node', node: updated }
+      }
+      return
+    }
+  }
+
+  nodes.value = nodes.value.map(n => {
+    if (n.id !== id) return n
+    const next = { ...n, data: { ...n.data, [key]: value } }
+    if (singleSelection.value?.type === 'node' && singleSelection.value.node?.id === id) {
+      singleSelection.value = { type: 'node', node: next }
+    }
+    return next
+  })
+  if (baseSnapshot) {
+    baseSnapshot.nodes = baseSnapshot.nodes.map(n =>
+      n.id === id ? { ...n, data: { ...(n.data || {}), [key]: value } } : n
+    )
+  }
+}
+// 可被 step 覆盖的字段
+const STEP_OVERRIDE_KEYS = new Set(['direction', 'glow', 'state'])
+const NODE_OVERRIDE_KEYS = new Set(['message', 'messageIcon', 'messageState', 'plan', 'active', 'flashActive'])
+
+function patchEdge(id: string, key: string, value: any) {
+  // 预览中修改流向 / 流光 / state → 写入 step.edgeSettings (保留显式空值)
+  if (previewIdx.value !== null && STEP_OVERRIDE_KEYS.has(key)) {
+    const stepIdx = previewIdx.value
+    const step = sequence.value[stepIdx]
+    if (step) {
+      const curOverride = step.edgeSettings?.[id] || {}
+      const newOverride: any = { ...curOverride, [key]: value }
+      const newMap = { ...(step.edgeSettings || {}), [id]: newOverride }
+      const newEdges = step.edges.includes(id) ? step.edges : [...step.edges, id]
+      const newSeq = sequence.value.slice()
+      newSeq[stepIdx] = { ...step, edges: newEdges, edgeSettings: newMap }
+      sequence.value = newSeq
+      applyStep(sequence.value[stepIdx], stepIdx)
+      const updatedEdge = edges.value.find(e => e.id === id)
+      if (updatedEdge && singleSelection.value?.type === 'edge' && singleSelection.value.edge?.id === id) {
+        singleSelection.value = { type: 'edge', edge: updatedEdge }
+      }
+      return
+    }
+  }
+
+  // 否则：更新 base
+  edges.value = edges.value.map(e => {
+    if (e.id !== id) return e
+    const next = { ...e, data: { ...(e.data as any || {}), [key]: value } }
+    if (singleSelection.value?.type === 'edge' && singleSelection.value.edge?.id === id) {
+      singleSelection.value = { type: 'edge', edge: next }
+    }
+    return next
+  })
+  if (baseSnapshot) {
+    baseSnapshot.edges = baseSnapshot.edges.map(e =>
+      e.id === id ? { ...e, data: { ...((e.data as any) || {}), [key]: value } } : e
+    )
+  }
+}
+function deleteNode(id: string) {
+  nodes.value = nodes.value.filter(n => n.id !== id)
+  edges.value = edges.value.filter(e => e.source !== id && e.target !== id)
+  invalidateSnapshot()
+  clearSelection()
+}
+function deleteEdge(id: string) {
+  edges.value = edges.value.filter(e => e.id !== id)
+  invalidateSnapshot()
+  clearSelection()
+}
+
+// ----- Rename (cascade to edges + sequence + selection) -----
+function renameNode(oldId: string, newId: string) {
+  if (nodes.value.find(n => n.id === newId)) {
+    ElMessage?.warning?.(`节点 ID "${newId}" 已存在`)
+    // 触发 Inspector 重渲染（回退输入框）
+    if (singleSelection.value?.type === 'node') {
+      const cur = nodes.value.find(n => n.id === oldId)
+      if (cur) singleSelection.value = { type: 'node', node: { ...cur } }
+    }
+    return
+  }
+  nodes.value = nodes.value.map(n => n.id === oldId ? { ...n, id: newId } : n)
+  edges.value = edges.value.map(e => ({
+    ...e,
+    source: e.source === oldId ? newId : e.source,
+    target: e.target === oldId ? newId : e.target
+  }))
+  sequence.value = sequence.value.map(s => ({
+    ...s,
+    nodes: s.nodes.map(i => i === oldId ? newId : i)
+  }))
+  selectedIds.value = selectedIds.value.map(i => i === oldId ? newId : i)
+  if (singleSelection.value?.type === 'node' && singleSelection.value.node?.id === oldId) {
+    const updated = nodes.value.find(n => n.id === newId)
+    if (updated) singleSelection.value = { type: 'node', node: updated }
+  }
+  ElMessage?.success?.(`已重命名: ${oldId} → ${newId}`)
+}
+
+function renameEdge(oldId: string, newId: string) {
+  if (edges.value.find(e => e.id === newId)) {
+    ElMessage?.warning?.(`连线 ID "${newId}" 已存在`)
+    if (singleSelection.value?.type === 'edge') {
+      const cur = edges.value.find(e => e.id === oldId)
+      if (cur) singleSelection.value = { type: 'edge', edge: { ...cur } }
+    }
+    return
+  }
+  edges.value = edges.value.map(e => e.id === oldId ? { ...e, id: newId } : e)
+  sequence.value = sequence.value.map(s => ({
+    ...s,
+    edges: s.edges.map(i => i === oldId ? newId : i)
+  }))
+  if (singleSelection.value?.type === 'edge' && singleSelection.value.edge?.id === oldId) {
+    const updated = edges.value.find(e => e.id === newId)
+    if (updated) singleSelection.value = { type: 'edge', edge: updated }
+  }
+  ElMessage?.success?.(`已重命名: ${oldId} → ${newId}`)
+}
+
+// ----- 对齐 -----
+function getSize(n: Node) {
+  const w = parseFloat(String((n.style as any)?.width ?? 140))
+  const h = parseFloat(String((n.style as any)?.height ?? 60))
+  return { w: isNaN(w) ? 140 : w, h: isNaN(h) ? 60 : h }
+}
+
+function align(mode: 'left' | 'right' | 'centerX' | 'top' | 'bottom' | 'centerY') {
+  const selected = nodes.value.filter(n => selectedIds.value.includes(n.id))
+  if (selected.length < 2) return
+
+  if (mode === 'left') {
+    const x = Math.min(...selected.map(n => n.position.x))
+    mutate(selected, n => ({ ...n.position, x }))
+  } else if (mode === 'right') {
+    const target = Math.max(...selected.map(n => n.position.x + getSize(n).w))
+    mutate(selected, n => ({ ...n.position, x: target - getSize(n).w }))
+  } else if (mode === 'centerX') {
+    const centers = selected.map(n => n.position.x + getSize(n).w / 2)
+    const cx = centers.reduce((a, b) => a + b, 0) / centers.length
+    mutate(selected, n => ({ ...n.position, x: cx - getSize(n).w / 2 }))
+  } else if (mode === 'top') {
+    const y = Math.min(...selected.map(n => n.position.y))
+    mutate(selected, n => ({ ...n.position, y }))
+  } else if (mode === 'bottom') {
+    const target = Math.max(...selected.map(n => n.position.y + getSize(n).h))
+    mutate(selected, n => ({ ...n.position, y: target - getSize(n).h }))
+  } else if (mode === 'centerY') {
+    const centers = selected.map(n => n.position.y + getSize(n).h / 2)
+    const cy = centers.reduce((a, b) => a + b, 0) / centers.length
+    mutate(selected, n => ({ ...n.position, y: cy - getSize(n).h / 2 }))
+  }
+}
+
+function distribute(axis: 'h' | 'v') {
+  const selected = nodes.value.filter(n => selectedIds.value.includes(n.id))
+  if (selected.length < 3) return
+  const sorted = [...selected].sort((a, b) =>
+    axis === 'h' ? a.position.x - b.position.x : a.position.y - b.position.y
+  )
+  const first = sorted[0], last = sorted[sorted.length - 1]
+  const total = axis === 'h'
+    ? last.position.x - first.position.x
+    : last.position.y - first.position.y
+  const gap = total / (sorted.length - 1)
+  sorted.forEach((n, i) => {
+    if (i === 0 || i === sorted.length - 1) return
+    const newPos = axis === 'h'
+      ? { ...n.position, x: first.position.x + gap * i }
+      : { ...n.position, y: first.position.y + gap * i }
+    updatePos(n.id, newPos)
+  })
+}
+
+function snapSelectedToGrid() {
+  const selected = nodes.value.filter(n => selectedIds.value.includes(n.id))
+  mutate(selected, n => ({
+    x: Math.round(n.position.x / 20) * 20,
+    y: Math.round(n.position.y / 20) * 20
+  }))
+}
+
+function mutate(targets: Node[], mapPos: (n: Node) => { x: number; y: number }) {
+  const ids = new Set(targets.map(n => n.id))
+  nodes.value = nodes.value.map(n => ids.has(n.id) ? { ...n, position: mapPos(n) } : n)
+}
+function updatePos(id: string, pos: { x: number; y: number }) {
+  nodes.value = nodes.value.map(n => n.id === id ? { ...n, position: pos } : n)
+}
+
+// ----- 动作 -----
+function clearCanvas() {
+  if (nodes.value.length === 0 && edges.value.length === 0) return
+  if (!confirm('确认清空所有节点和连线？')) return
+  nodes.value = []; edges.value = []; clearSelection()
+}
+
+async function save() {
+  const cleanNodes = nodes.value.map(n => {
+    if (n.type !== 'mission') return { ...n }
+    const { active, flashActive, ...restData } = (n.data || {}) as any
+    return { ...n, data: restData }
+  })
+  const cleanEdges = edges.value.map(e => ({
+    ...e,
+    data: { ...((e.data as any) || {}), state: 'idle' }
+  }))
+  // 保留用户在主页拖拽后的 captionTop
+  const prev = await fetchRemoteState()
+  await saveAll({
+    topology: { nodes: cleanNodes, edges: cleanEdges },
+    sequence: sequence.value,
+    legend:   legend.value,
+    captionTop: typeof prev?.captionTop === 'number' ? prev.captionTop : 40
+  })
+  ElMessage?.success?.('已保存并应用到首页')
+  back()
+}
+function back() { navigateTo('/') }
+
+/* ============ JSON 导入 / 导出 ============ */
+const ioMode  = ref<'import' | 'export' | null>(null)
+const ioText  = ref('')
+const ioError = ref('')
+
+function openIo(mode: 'import' | 'export') {
+  ioError.value = ''
+  if (mode === 'export') {
+    const payload = {
+      nodes: nodes.value,
+      edges: edges.value,
+      sequence: sequence.value,
+      legend: legend.value
+    }
+    ioText.value = JSON.stringify(payload, null, 2)
+  } else {
+    ioText.value = ''
+  }
+  ioMode.value = mode
+}
+
+async function copyIoText() {
+  try {
+    await navigator.clipboard.writeText(ioText.value)
+    ElMessage?.success?.('已复制到剪贴板')
+  } catch {
+    ElMessage?.warning?.('复制失败，请手动选择复制')
+  }
+}
+
+function applyImport() {
+  ioError.value = ''
+  if (!ioText.value.trim()) { ioError.value = 'JSON 不能为空'; return }
+  let parsed: any
+  try { parsed = JSON.parse(ioText.value) }
+  catch (e: any) { ioError.value = 'JSON 解析失败: ' + (e?.message || e); return }
+  if (!parsed || typeof parsed !== 'object') {
+    ioError.value = '根对象必须是 { nodes, edges, ... }'; return
+  }
+  if (!Array.isArray(parsed.nodes) || !Array.isArray(parsed.edges)) {
+    ioError.value = 'nodes 和 edges 必须是数组'; return
+  }
+  // 应用
+  nodes.value  = parsed.nodes
+  edges.value  = parsed.edges
+  sequence.value = Array.isArray(parsed.sequence) ? parsed.sequence : []
+  if (parsed.legend && typeof parsed.legend === 'object') legend.value = parsed.legend
+  invalidateSnapshot()
+  clearSelection()
+  ioMode.value = null
+  ElMessage?.success?.(`已导入：${parsed.nodes.length} 节点 / ${parsed.edges.length} 连线`)
+}
+
+// ----- 序列预览 -----
+let timers: ReturnType<typeof setTimeout>[] = []
+function playSequence() {
+  previewIdx.value = null
+  restoreSnapshot()
+  clearHighlight()
+  timers.forEach(clearTimeout); timers = []
+  takeSnapshot()
+  sequence.value.forEach((step, idx) => {
+    timers.push(setTimeout(() => applyStep(step, idx), (idx + 1) * 1200))
+  })
+  timers.push(setTimeout(() => {
+    playingIdx.value = -1
+    restoreSnapshot()
+  }, (sequence.value.length + 2) * 1200))
+}
+// 在进入预览/播放前抓取基线快照；退出时还原
+let baseSnapshot: { nodes: Node[]; edges: Edge[] } | null = null
+function takeSnapshot() {
+  baseSnapshot = {
+    nodes: JSON.parse(JSON.stringify(nodes.value)),
+    edges: JSON.parse(JSON.stringify(edges.value))
+  }
+}
+function restoreSnapshot() {
+  if (!baseSnapshot) return
+  nodes.value = baseSnapshot.nodes
+  edges.value = baseSnapshot.edges
+  baseSnapshot = null
+}
+/** 编辑器修改节点/边后，snapshot 失效，下次 applyStep 时重新采集，
+ *  保证基线是最新的 Inspector 编辑结果 */
+function invalidateSnapshot() {
+  baseSnapshot = null
+}
+
+function applyStep(step: SequenceStep, idx: number) {
+  if (!baseSnapshot) takeSnapshot()
+  playingIdx.value = idx
+  const base = baseSnapshot!
+  const nodeS = step.nodeSettings || {}
+  nodes.value = base.nodes.map(n => {
+    if (n.type !== 'mission') return { ...n, data: { ...(n.data || {}) } }
+    const active = step.nodes.includes(n.id)
+    const baseData = (n.data || {}) as any
+    const ov = nodeS[n.id] || {}
+    // 优先 override -> 基础 data -> 默认
+    const next: any = {
+      ...baseData,
+      active: ov.active ?? active,
+      flashActive: ov.flashActive ?? active
+    }
+    if (ov.message !== undefined)      next.message = ov.message
+    if (ov.messageIcon !== undefined)  next.messageIcon = ov.messageIcon
+    if (ov.messageState !== undefined) next.messageState = ov.messageState
+    if ('plan' in ov) {
+      if (ov.plan === null) delete next.plan
+      else next.plan = ov.plan
+    }
+    return { ...n, data: next }
+  })
+  const settings = step.edgeSettings || {}
+  edges.value = base.edges.map(e => {
+    const baseData = (e.data as any) || {}
+    const override = settings[e.id]
+    const highlighted = step.edges.includes(e.id) || !!override
+    if (!highlighted) {
+      return { ...e, data: { ...baseData, state: 'idle' } }
+    }
+    return {
+      ...e,
+      data: {
+        ...baseData,
+        state: override?.state || 'selected',
+        direction: override?.direction ?? baseData.direction ?? 'forward',
+        glow:      override?.glow      ?? baseData.glow      ?? false
+      }
+    }
+  })
+}
+function clearHighlight() {
+  nodes.value = nodes.value.map(n => n.type === 'mission'
+    ? { ...n, data: { ...n.data, active: false, flashActive: false } } : n)
+  edges.value = edges.value.map(e => ({ ...e, data: { ...(e.data as any), state: 'idle' } }))
+}
+
+/** 用户在 SequenceBuilder 里改动任何 chip / override 时立即重放该 step，让画布同步 */
+function syncPreview(idx: number) {
+  timers.forEach(clearTimeout); timers = []
+  playingIdx.value = -1
+  if (idx < 0 || idx >= sequence.value.length) return
+  previewIdx.value = idx
+  nextTick(() => applyStep(sequence.value[idx], idx))
+}
+
+function removeFromStage(type: 'node' | 'edge', id: string) {
+  if (previewIdx.value === null) return
+  const stepIdx = previewIdx.value
+  const step = sequence.value[stepIdx]
+  if (!step) return
+  const newStep: any = { ...step }
+  if (type === 'node') {
+    newStep.nodes = step.nodes.filter(i => i !== id)
+    if (step.nodeSettings && step.nodeSettings[id]) {
+      const m = { ...step.nodeSettings }; delete m[id]
+      newStep.nodeSettings = Object.keys(m).length ? m : undefined
+    }
+  } else {
+    newStep.edges = step.edges.filter(i => i !== id)
+    if (step.edgeSettings && step.edgeSettings[id]) {
+      const m = { ...step.edgeSettings }; delete m[id]
+      newStep.edgeSettings = Object.keys(m).length ? m : undefined
+    }
+  }
+  const newSeq = sequence.value.slice()
+  newSeq[stepIdx] = newStep
+  sequence.value = newSeq
+  applyStep(sequence.value[stepIdx], stepIdx)
+  ElMessage?.success?.(`已从 Stage ${stepIdx + 1} 移除该${type === 'node' ? '节点' : '连线'}`)
+}
+
+function focusElement(type: 'node' | 'edge', id: string) {
+  if (type === 'node') {
+    const node = nodes.value.find(n => n.id === id)
+    if (node) {
+      selectedIds.value = [node.id]
+      singleSelection.value = { type: 'node', node }
+    }
+  } else {
+    const edge = edges.value.find(e => e.id === id)
+    if (edge) {
+      selectedIds.value = []
+      singleSelection.value = { type: 'edge', edge }
+    }
+  }
+}
+
+// 单步预览 — idx 为 null 时还原
+function previewStep(idx: number | null) {
+  timers.forEach(clearTimeout); timers = []
+  playingIdx.value = -1
+  if (idx === null || idx < 0 || idx >= sequence.value.length) {
+    previewIdx.value = null
+    restoreSnapshot()
+    clearHighlight()
+    return
+  }
+  previewIdx.value = idx
+  applyStep(sequence.value[idx], idx)
+}
+</script>
+
+<style scoped>
+.editor-shell { overflow: hidden; }
+.icon-button.is-on {
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.10), rgba(255, 255, 255, 0.96));
+  border-color: color-mix(in srgb, var(--color-blue) 40%, var(--color-border));
+  color: #2563eb;
+}
+.io-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.28);
+  backdrop-filter: blur(8px);
+  display: grid;
+  place-items: center;
+  z-index: 100;
+}
+.io-modal {
+  width: min(760px, calc(100% - 48px));
+  max-height: min(80vh, 860px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.22);
+}
+.io-body {
+  flex: 1;
+  padding: 14px 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+.io-textarea {
+  flex: 1;
+  min-height: 320px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-btn);
+  background: #0f172a;
+  color: #e2e8f0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+}
+.io-textarea:focus {
+  border-color: color-mix(in srgb, var(--color-blue) 42%, var(--color-border));
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+}
+.io-error {
+  font-size: 0.78rem;
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.24);
+  border-radius: var(--radius-btn);
+  padding: 8px 10px;
+}
+.io-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--color-border);
+  background: rgba(248, 250, 252, 0.6);
+}
+</style>
