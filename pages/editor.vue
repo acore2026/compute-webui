@@ -244,6 +244,29 @@
             <Controls />
           </VueFlow>
 
+          <!-- 当前 Stage 指示器 -->
+          <div
+            v-if="previewIdx !== null && sequence[previewIdx]"
+            class="absolute top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-4 py-1.5 rounded-full"
+            style="
+              background: rgba(255, 255, 255, 0.95);
+              border: 1px solid rgba(59, 130, 246, 0.35);
+              box-shadow: 0 4px 14px rgba(15, 23, 42, 0.10);
+              font-size: 0.76rem;
+              font-weight: 600;
+              color: #1e3a8a;
+            "
+          >
+            <span class="w-2 h-2 rounded-full" style="background:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,0.22);"></span>
+            <span style="font-size:0.64rem; letter-spacing:0.12em; text-transform:uppercase; color:#2563eb;">
+              {{ sequence[previewIdx].kicker || `STAGE ${previewIdx + 1}` }}
+            </span>
+            <span style="color:#334155;">{{ sequence[previewIdx].title }}</span>
+            <span v-if="sequence[previewIdx].phase" style="color:#64748b; font-weight:400;">
+              · {{ sequence[previewIdx].phase }}
+            </span>
+          </div>
+
           <div
             class="absolute top-3 right-3 text-[0.66rem] font-mono px-2.5 py-1 rounded-full"
             style="background:rgba(255,255,255,0.92); border:1px solid var(--color-border); color:#475569;"
@@ -427,6 +450,20 @@ const singleSelection = ref<Selection | null>(null)
 const missionNodeIds = computed(() => nodes.value.filter(n => n.type === 'mission').map(n => n.id))
 const edgeIds = computed(() => edges.value.map(e => e.id))
 
+/** 确保至少存在一个默认 stage */
+function ensureDefaultStage() {
+  if (sequence.value.length === 0) {
+    sequence.value = [{
+      id: `step-${Date.now()}`,
+      kicker: 'STAGE 1',
+      title: '默认阶段',
+      phase: '',
+      nodes: [],
+      edges: []
+    }]
+  }
+}
+
 onMounted(async () => {
   const all = await loadAll(activeView.value)
   nodes.value = all.topology.nodes
@@ -434,10 +471,15 @@ onMounted(async () => {
   sequence.value = all.sequence
   legend.value = all.legend
   captionVisible.value = all.captionVisible
+  ensureDefaultStage()
+  // 自动预览第一个 stage，让画布立刻展示该 stage
+  nextTick(() => previewStep(0))
 })
 
 // 手动切换 ?view= 时重新装载
 watch(activeView, async (v) => {
+  previewIdx.value = null
+  restoreSnapshot()
   const all = await loadAll(v)
   nodes.value = all.topology.nodes
   edges.value = all.topology.edges
@@ -446,6 +488,8 @@ watch(activeView, async (v) => {
   captionVisible.value = all.captionVisible
   selectedIds.value = []
   singleSelection.value = null
+  ensureDefaultStage()
+  nextTick(() => previewStep(0))
 })
 
 // ----- 选择 -----
@@ -965,6 +1009,11 @@ function playSequence() {
   timers.push(setTimeout(() => {
     playingIdx.value = -1
     restoreSnapshot()
+    // 播放结束后回到默认 stage
+    if (sequence.value.length > 0) {
+      previewIdx.value = 0
+      nextTick(() => applyStep(sequence.value[0], 0))
+    }
   }, (sequence.value.length + 2) * 1200))
 }
 // 在进入预览/播放前抓取基线快照；退出时还原
@@ -1090,15 +1139,24 @@ function focusElement(type: 'node' | 'edge', id: string) {
   }
 }
 
-// 单步预览 — idx 为 null 时还原
+// 单步预览 — idx 为 null 时回退到默认 stage(第 0 个)
 function previewStep(idx: number | null) {
   timers.forEach(clearTimeout); timers = []
   playingIdx.value = -1
   if (idx === null || idx < 0 || idx >= sequence.value.length) {
-    previewIdx.value = null
+    // 退出预览时，先还原快照，再自动回到默认 stage
     restoreSnapshot()
     clearHighlight()
-    refreshSelectionFromCanvas()
+    if (sequence.value.length > 0) {
+      previewIdx.value = 0
+      nextTick(() => {
+        applyStep(sequence.value[0], 0)
+        refreshSelectionFromCanvas()
+      })
+    } else {
+      previewIdx.value = null
+      refreshSelectionFromCanvas()
+    }
     return
   }
   previewIdx.value = idx

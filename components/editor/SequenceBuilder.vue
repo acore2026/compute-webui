@@ -105,7 +105,13 @@
           <button class="icon-button icon-button-sm" @click="move(idx, 1)" :disabled="idx === steps.length - 1" title="下移">
             <el-icon :size="12"><Bottom /></el-icon>
           </button>
-          <button class="icon-button icon-button-sm" style="color: #b91c1c;" @click="remove(idx)" title="删除">
+          <button
+            class="icon-button icon-button-sm"
+            style="color: #b91c1c;"
+            @click="remove(idx)"
+            title="删除"
+            :disabled="steps.length <= 1"
+          >
             <el-icon :size="12"><Delete /></el-icon>
           </button>
         </div>
