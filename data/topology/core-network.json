@@ -190,7 +190,7 @@
           "y": 60
         },
         "data": {
-          "label": "身份管理IDM",
+          "label": "IDM",
           "role": "",
           "kind": "idm",
           "handles": [
@@ -274,7 +274,7 @@
           "y": 220
         },
         "data": {
-          "label": "信令路由SRF",
+          "label": "SRF",
           "role": "",
           "kind": "signaling",
           "handles": [
@@ -358,7 +358,7 @@
           "y": 120
         },
         "data": {
-          "label": "ACN 智能体",
+          "label": "ACN Agent",
           "role": "",
           "kind": "acn_agent",
           "handles": [
@@ -442,7 +442,7 @@
           "y": 200
         },
         "data": {
-          "label": "计算智能体",
+          "label": "Computig Agent",
           "role": "",
           "kind": "compute_agent",
           "handles": [
@@ -526,7 +526,7 @@
           "y": 200
         },
         "data": {
-          "label": "SYS 智能体",
+          "label": "System Agent",
           "role": "",
           "kind": "sys_agent",
           "handles": [
@@ -610,177 +610,9 @@
           "y": 280
         },
         "data": {
-          "label": "连接智能体",
+          "label": "Connecting Agent",
           "role": "",
           "kind": "connect_agent",
-          "handles": [
-            "in-top",
-            "out-bottom",
-            "in-left",
-            "out-right"
-          ]
-        },
-        "events": {},
-        "style": {
-          "width": "140px"
-        },
-        "zIndex": 10
-      },
-      {
-        "id": "robot-1",
-        "type": "mission",
-        "dimensions": {
-          "width": 140,
-          "height": 64
-        },
-        "computedPosition": {
-          "x": 520,
-          "y": 520,
-          "z": 10
-        },
-        "handleBounds": {
-          "source": [
-            {
-              "id": "out-bottom",
-              "type": "source",
-              "nodeId": "robot-1",
-              "position": "bottom",
-              "x": 64,
-              "y": 57,
-              "width": 12,
-              "height": 12
-            },
-            {
-              "id": "out-right",
-              "type": "source",
-              "nodeId": "robot-1",
-              "position": "right",
-              "x": 133,
-              "y": 26,
-              "width": 12,
-              "height": 12
-            }
-          ],
-          "target": [
-            {
-              "id": "in-top",
-              "type": "target",
-              "nodeId": "robot-1",
-              "position": "top",
-              "x": 64,
-              "y": -5,
-              "width": 12,
-              "height": 12
-            },
-            {
-              "id": "in-left",
-              "type": "target",
-              "nodeId": "robot-1",
-              "position": "left",
-              "x": -5,
-              "y": 26,
-              "width": 12,
-              "height": 12
-            }
-          ]
-        },
-        "selected": false,
-        "dragging": false,
-        "resizing": false,
-        "initialized": false,
-        "isParent": false,
-        "position": {
-          "x": 520,
-          "y": 520
-        },
-        "data": {
-          "label": "机器狗/机械臂",
-          "role": "",
-          "kind": "robot",
-          "handles": [
-            "in-top",
-            "out-bottom",
-            "in-left",
-            "out-right"
-          ]
-        },
-        "events": {},
-        "style": {
-          "width": "140px"
-        },
-        "zIndex": 10
-      },
-      {
-        "id": "labubu-1",
-        "type": "mission",
-        "dimensions": {
-          "width": 140,
-          "height": 64
-        },
-        "computedPosition": {
-          "x": 840,
-          "y": 520,
-          "z": 10
-        },
-        "handleBounds": {
-          "source": [
-            {
-              "id": "out-bottom",
-              "type": "source",
-              "nodeId": "labubu-1",
-              "position": "bottom",
-              "x": 64,
-              "y": 57,
-              "width": 12,
-              "height": 12
-            },
-            {
-              "id": "out-right",
-              "type": "source",
-              "nodeId": "labubu-1",
-              "position": "right",
-              "x": 133,
-              "y": 26,
-              "width": 12,
-              "height": 12
-            }
-          ],
-          "target": [
-            {
-              "id": "in-top",
-              "type": "target",
-              "nodeId": "labubu-1",
-              "position": "top",
-              "x": 64,
-              "y": -5,
-              "width": 12,
-              "height": 12
-            },
-            {
-              "id": "in-left",
-              "type": "target",
-              "nodeId": "labubu-1",
-              "position": "left",
-              "x": -5,
-              "y": 26,
-              "width": 12,
-              "height": 12
-            }
-          ]
-        },
-        "selected": false,
-        "dragging": false,
-        "resizing": false,
-        "initialized": false,
-        "isParent": false,
-        "position": {
-          "x": 840,
-          "y": 520
-        },
-        "data": {
-          "label": "Labubu",
-          "role": "",
-          "kind": "labubu",
           "handles": [
             "in-top",
             "out-bottom",
@@ -1072,7 +904,7 @@
           "y": 80
         },
         "data": {
-          "label": "智能体服务域",
+          "label": "",
           "variant": "external",
           "pattern": "grid"
         },
@@ -1109,7 +941,7 @@
           "y": 60
         },
         "data": {
-          "label": "计算服务域",
+          "label": "",
           "variant": "default"
         },
         "events": {},
@@ -1969,7 +1801,7 @@
           "y": 380
         },
         "data": {
-          "label": "用户面",
+          "label": "6G UP",
           "role": "",
           "kind": "user_plane",
           "handles": [
@@ -2308,6 +2140,133 @@
           "width": "140px"
         },
         "zIndex": 10
+      },
+      {
+        "id": "img-1",
+        "type": "image",
+        "dimensions": {
+          "width": 100,
+          "height": 121
+        },
+        "computedPosition": {
+          "x": 540,
+          "y": 500,
+          "z": 10
+        },
+        "handleBounds": {
+          "source": [
+            {
+              "id": "out-top",
+              "type": "source",
+              "nodeId": "img-1",
+              "position": "top",
+              "x": 44,
+              "y": -6,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "out-bottom",
+              "type": "source",
+              "nodeId": "img-1",
+              "position": "bottom",
+              "x": 44,
+              "y": 114.5625,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "out-left",
+              "type": "source",
+              "nodeId": "img-1",
+              "position": "left",
+              "x": -6,
+              "y": 54.28125,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "out-right",
+              "type": "source",
+              "nodeId": "img-1",
+              "position": "right",
+              "x": 94,
+              "y": 54.28125,
+              "width": 12,
+              "height": 12
+            }
+          ],
+          "target": [
+            {
+              "id": "in-top",
+              "type": "target",
+              "nodeId": "img-1",
+              "position": "top",
+              "x": 44,
+              "y": -6,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "in-bottom",
+              "type": "target",
+              "nodeId": "img-1",
+              "position": "bottom",
+              "x": 44,
+              "y": 114.5625,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "in-left",
+              "type": "target",
+              "nodeId": "img-1",
+              "position": "left",
+              "x": -6,
+              "y": 54.28125,
+              "width": 12,
+              "height": 12
+            },
+            {
+              "id": "in-right",
+              "type": "target",
+              "nodeId": "img-1",
+              "position": "right",
+              "x": 94,
+              "y": 54.28125,
+              "width": 12,
+              "height": 12
+            }
+          ]
+        },
+        "selected": true,
+        "dragging": false,
+        "resizing": false,
+        "initialized": false,
+        "isParent": false,
+        "position": {
+          "x": 540,
+          "y": 500
+        },
+        "data": {
+          "label": "机器狗",
+          "src": "/assets/uploads/b80128ed.png",
+          "handles": [
+            "in-top",
+            "out-top",
+            "in-bottom",
+            "out-bottom",
+            "in-left",
+            "out-left",
+            "in-right",
+            "out-right"
+          ]
+        },
+        "events": {},
+        "style": {
+          "width": "100px"
+        },
+        "zIndex": 10
       }
     ],
     "edges": [
@@ -2393,7 +2352,7 @@
             "y": 60
           },
           "data": {
-            "label": "身份管理IDM",
+            "label": "IDM",
             "role": "",
             "kind": "idm",
             "handles": [
@@ -3052,7 +3011,7 @@
             "y": 220
           },
           "data": {
-            "label": "信令路由SRF",
+            "label": "SRF",
             "role": "",
             "kind": "signaling",
             "handles": [
@@ -3156,7 +3115,7 @@
             "y": 200
           },
           "data": {
-            "label": "计算智能体",
+            "label": "Computig Agent",
             "role": "",
             "kind": "compute_agent",
             "handles": [
@@ -3240,7 +3199,7 @@
             "y": 280
           },
           "data": {
-            "label": "连接智能体",
+            "label": "Connecting Agent",
             "role": "",
             "kind": "connect_agent",
             "handles": [
@@ -3344,7 +3303,7 @@
             "y": 120
           },
           "data": {
-            "label": "ACN 智能体",
+            "label": "ACN Agent",
             "role": "",
             "kind": "acn_agent",
             "handles": [
@@ -3428,7 +3387,7 @@
             "y": 200
           },
           "data": {
-            "label": "计算智能体",
+            "label": "Computig Agent",
             "role": "",
             "kind": "compute_agent",
             "handles": [
@@ -3531,7 +3490,7 @@
             "y": 200
           },
           "data": {
-            "label": "SYS 智能体",
+            "label": "System Agent",
             "role": "",
             "kind": "sys_agent",
             "handles": [
@@ -3615,7 +3574,7 @@
             "y": 200
           },
           "data": {
-            "label": "计算智能体",
+            "label": "Computig Agent",
             "role": "",
             "kind": "compute_agent",
             "handles": [
@@ -3719,7 +3678,7 @@
             "y": 200
           },
           "data": {
-            "label": "计算智能体",
+            "label": "Computig Agent",
             "role": "",
             "kind": "compute_agent",
             "handles": [
@@ -3907,7 +3866,7 @@
             "y": 200
           },
           "data": {
-            "label": "计算智能体",
+            "label": "Computig Agent",
             "role": "",
             "kind": "compute_agent",
             "handles": [
@@ -4095,7 +4054,7 @@
             "y": 200
           },
           "data": {
-            "label": "SYS 智能体",
+            "label": "System Agent",
             "role": "",
             "kind": "sys_agent",
             "handles": [
@@ -4179,7 +4138,7 @@
             "y": 120
           },
           "data": {
-            "label": "ACN 智能体",
+            "label": "ACN Agent",
             "role": "",
             "kind": "acn_agent",
             "handles": [
@@ -4283,7 +4242,7 @@
             "y": 200
           },
           "data": {
-            "label": "SYS 智能体",
+            "label": "System Agent",
             "role": "",
             "kind": "sys_agent",
             "handles": [
@@ -4367,7 +4326,7 @@
             "y": 280
           },
           "data": {
-            "label": "连接智能体",
+            "label": "Connecting Agent",
             "role": "",
             "kind": "connect_agent",
             "handles": [
@@ -4575,193 +4534,6 @@
         "sourceY": 169,
         "targetX": 910,
         "targetY": 195
-      },
-      {
-        "id": "e-robot-1-labubu-1-mnyijdly",
-        "type": "mission",
-        "source": "robot-1",
-        "target": "labubu-1",
-        "sourceHandle": "out-right",
-        "targetHandle": "in-left",
-        "data": {
-          "kind": "baseline",
-          "pathType": "bezier",
-          "state": "idle"
-        },
-        "events": {},
-        "label": "",
-        "sourceNode": {
-          "id": "robot-1",
-          "type": "mission",
-          "dimensions": {
-            "width": 140,
-            "height": 64
-          },
-          "computedPosition": {
-            "x": 520,
-            "y": 520,
-            "z": 10
-          },
-          "handleBounds": {
-            "source": [
-              {
-                "id": "out-bottom",
-                "type": "source",
-                "nodeId": "robot-1",
-                "position": "bottom",
-                "x": 64,
-                "y": 57,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-right",
-                "type": "source",
-                "nodeId": "robot-1",
-                "position": "right",
-                "x": 133,
-                "y": 26,
-                "width": 12,
-                "height": 12
-              }
-            ],
-            "target": [
-              {
-                "id": "in-top",
-                "type": "target",
-                "nodeId": "robot-1",
-                "position": "top",
-                "x": 64,
-                "y": -5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-left",
-                "type": "target",
-                "nodeId": "robot-1",
-                "position": "left",
-                "x": -5,
-                "y": 26,
-                "width": 12,
-                "height": 12
-              }
-            ]
-          },
-          "selected": false,
-          "dragging": false,
-          "resizing": false,
-          "initialized": false,
-          "isParent": false,
-          "position": {
-            "x": 520,
-            "y": 520
-          },
-          "data": {
-            "label": "机器狗/机械臂",
-            "role": "",
-            "kind": "robot",
-            "handles": [
-              "in-top",
-              "out-bottom",
-              "in-left",
-              "out-right"
-            ]
-          },
-          "events": {},
-          "style": {
-            "width": "140px"
-          },
-          "zIndex": 10
-        },
-        "targetNode": {
-          "id": "labubu-1",
-          "type": "mission",
-          "dimensions": {
-            "width": 140,
-            "height": 64
-          },
-          "computedPosition": {
-            "x": 840,
-            "y": 520,
-            "z": 10
-          },
-          "handleBounds": {
-            "source": [
-              {
-                "id": "out-bottom",
-                "type": "source",
-                "nodeId": "labubu-1",
-                "position": "bottom",
-                "x": 64,
-                "y": 57,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-right",
-                "type": "source",
-                "nodeId": "labubu-1",
-                "position": "right",
-                "x": 133,
-                "y": 26,
-                "width": 12,
-                "height": 12
-              }
-            ],
-            "target": [
-              {
-                "id": "in-top",
-                "type": "target",
-                "nodeId": "labubu-1",
-                "position": "top",
-                "x": 64,
-                "y": -5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-left",
-                "type": "target",
-                "nodeId": "labubu-1",
-                "position": "left",
-                "x": -5,
-                "y": 26,
-                "width": 12,
-                "height": 12
-              }
-            ]
-          },
-          "selected": false,
-          "dragging": false,
-          "resizing": false,
-          "initialized": false,
-          "isParent": false,
-          "position": {
-            "x": 840,
-            "y": 520
-          },
-          "data": {
-            "label": "Labubu",
-            "role": "",
-            "kind": "labubu",
-            "handles": [
-              "in-top",
-              "out-bottom",
-              "in-left",
-              "out-right"
-            ]
-          },
-          "events": {},
-          "style": {
-            "width": "140px"
-          },
-          "zIndex": 10
-        },
-        "sourceX": 665,
-        "sourceY": 552,
-        "targetX": 835,
-        "targetY": 552
       },
       {
         "id": "e-bar-1-sys_agent-1-mnzox6ke",
@@ -5123,7 +4895,7 @@
             "y": 200
           },
           "data": {
-            "label": "SYS 智能体",
+            "label": "System Agent",
             "role": "",
             "kind": "sys_agent",
             "handles": [
@@ -6546,7 +6318,7 @@
             "y": 380
           },
           "data": {
-            "label": "用户面",
+            "label": "6G UP",
             "role": "",
             "kind": "user_plane",
             "handles": [
@@ -6869,7 +6641,7 @@
             "y": 380
           },
           "data": {
-            "label": "用户面",
+            "label": "6G UP",
             "role": "",
             "kind": "user_plane",
             "handles": [
@@ -7624,414 +7396,6 @@
         "selected": false
       },
       {
-        "id": "e-base_station-1-robot-1-mnzqh3c4",
-        "type": "mission",
-        "source": "base_station-1",
-        "target": "robot-1",
-        "sourceHandle": "out-right",
-        "targetHandle": "in-left",
-        "data": {
-          "kind": "baseline",
-          "pathType": "bezier",
-          "state": "idle"
-        },
-        "events": {},
-        "label": "",
-        "sourceNode": {
-          "id": "base_station-1",
-          "type": "mission",
-          "dimensions": {
-            "width": 140,
-            "height": 64
-          },
-          "computedPosition": {
-            "x": 120,
-            "y": 520,
-            "z": 10
-          },
-          "handleBounds": {
-            "source": [
-              {
-                "id": "out-top",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "top",
-                "x": 64,
-                "y": -5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-bottom",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "bottom",
-                "x": 64,
-                "y": 57,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-left",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "left",
-                "x": -5,
-                "y": 26,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-right",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "right",
-                "x": 133,
-                "y": 26,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-top-25",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "top",
-                "x": 29.5,
-                "y": -5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-top-75",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "top",
-                "x": 98.5,
-                "y": -5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-bottom-25",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "bottom",
-                "x": 29.5,
-                "y": 57,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-bottom-75",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "bottom",
-                "x": 98.5,
-                "y": 57,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-left-25",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "left",
-                "x": -5,
-                "y": 10.5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-left-75",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "left",
-                "x": -5,
-                "y": 41.5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-right-25",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "right",
-                "x": 133,
-                "y": 10.5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-right-75",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "right",
-                "x": 133,
-                "y": 41.5,
-                "width": 12,
-                "height": 12
-              }
-            ],
-            "target": [
-              {
-                "id": "in-top",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "top",
-                "x": 64,
-                "y": -5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-bottom",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "bottom",
-                "x": 64,
-                "y": 57,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-left",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "left",
-                "x": -5,
-                "y": 26,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-right",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "right",
-                "x": 133,
-                "y": 26,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-top-25",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "top",
-                "x": 29.5,
-                "y": -5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-top-75",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "top",
-                "x": 98.5,
-                "y": -5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-bottom-25",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "bottom",
-                "x": 29.5,
-                "y": 57,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-bottom-75",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "bottom",
-                "x": 98.5,
-                "y": 57,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-left-25",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "left",
-                "x": -5,
-                "y": 10.5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-left-75",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "left",
-                "x": -5,
-                "y": 41.5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-right-25",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "right",
-                "x": 133,
-                "y": 10.5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-right-75",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "right",
-                "x": 133,
-                "y": 41.5,
-                "width": 12,
-                "height": 12
-              }
-            ]
-          },
-          "selected": false,
-          "dragging": false,
-          "resizing": false,
-          "initialized": false,
-          "isParent": false,
-          "position": {
-            "x": 120,
-            "y": 520
-          },
-          "data": {
-            "label": "无线基站",
-            "role": "",
-            "kind": "base_station",
-            "handles": [
-              "in-top",
-              "out-top",
-              "in-bottom",
-              "out-bottom",
-              "in-left",
-              "out-left",
-              "in-right",
-              "out-right",
-              "in-top-25",
-              "out-top-25",
-              "in-top-75",
-              "out-top-75",
-              "in-bottom-25",
-              "out-bottom-25",
-              "in-bottom-75",
-              "out-bottom-75",
-              "in-left-25",
-              "out-left-25",
-              "in-left-75",
-              "out-left-75",
-              "in-right-25",
-              "out-right-25",
-              "in-right-75",
-              "out-right-75"
-            ]
-          },
-          "events": {},
-          "style": {
-            "width": "140px"
-          },
-          "zIndex": 10
-        },
-        "targetNode": {
-          "id": "robot-1",
-          "type": "mission",
-          "dimensions": {
-            "width": 140,
-            "height": 64
-          },
-          "computedPosition": {
-            "x": 520,
-            "y": 520,
-            "z": 10
-          },
-          "handleBounds": {
-            "source": [
-              {
-                "id": "out-bottom",
-                "type": "source",
-                "nodeId": "robot-1",
-                "position": "bottom",
-                "x": 64,
-                "y": 57,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-right",
-                "type": "source",
-                "nodeId": "robot-1",
-                "position": "right",
-                "x": 133,
-                "y": 26,
-                "width": 12,
-                "height": 12
-              }
-            ],
-            "target": [
-              {
-                "id": "in-top",
-                "type": "target",
-                "nodeId": "robot-1",
-                "position": "top",
-                "x": 64,
-                "y": -5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-left",
-                "type": "target",
-                "nodeId": "robot-1",
-                "position": "left",
-                "x": -5,
-                "y": 26,
-                "width": 12,
-                "height": 12
-              }
-            ]
-          },
-          "selected": false,
-          "dragging": false,
-          "resizing": false,
-          "initialized": false,
-          "isParent": false,
-          "position": {
-            "x": 520,
-            "y": 520
-          },
-          "data": {
-            "label": "机器狗/机械臂",
-            "role": "",
-            "kind": "robot",
-            "handles": [
-              "in-top",
-              "out-bottom",
-              "in-left",
-              "out-right"
-            ]
-          },
-          "events": {},
-          "style": {
-            "width": "140px"
-          },
-          "zIndex": 10
-        },
-        "sourceX": 265,
-        "sourceY": 552,
-        "targetX": 515,
-        "targetY": 552,
-        "selected": false
-      },
-      {
         "id": "e-base_station-1-user_plane-1-mnzqhe0x",
         "type": "mission",
         "source": "base_station-1",
@@ -8617,7 +7981,7 @@
             "y": 380
           },
           "data": {
-            "label": "用户面",
+            "label": "6G UP",
             "role": "",
             "kind": "user_plane",
             "handles": [
@@ -9245,7 +8609,7 @@
             "y": 380
           },
           "data": {
-            "label": "用户面",
+            "label": "6G UP",
             "role": "",
             "kind": "user_plane",
             "handles": [
@@ -9369,7 +8733,7 @@
             "y": 220
           },
           "data": {
-            "label": "信令路由SRF",
+            "label": "SRF",
             "role": "",
             "kind": "signaling",
             "handles": [
@@ -9777,7 +9141,7 @@
             "y": 280
           },
           "data": {
-            "label": "连接智能体",
+            "label": "Connecting Agent",
             "role": "",
             "kind": "connect_agent",
             "handles": [
@@ -10061,7 +9425,7 @@
             "y": 380
           },
           "data": {
-            "label": "用户面",
+            "label": "6G UP",
             "role": "",
             "kind": "user_plane",
             "handles": [
@@ -10101,6 +9465,457 @@
         "sourceY": 349,
         "targetX": 590,
         "targetY": 375
+      },
+      {
+        "id": "e-base_station-1-img-1-mo1k2fte",
+        "type": "mission",
+        "source": "base_station-1",
+        "target": "img-1",
+        "sourceHandle": "out-right",
+        "targetHandle": "out-left",
+        "data": {
+          "kind": "baseline",
+          "state": "idle",
+          "pathType": "straight"
+        },
+        "events": {},
+        "label": "",
+        "sourceNode": {
+          "id": "base_station-1",
+          "type": "mission",
+          "dimensions": {
+            "width": 140,
+            "height": 64
+          },
+          "computedPosition": {
+            "x": 120,
+            "y": 520,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-top",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-left",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-top-25",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "top",
+                "x": 29.5,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-top-75",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "top",
+                "x": 98.5,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-bottom-25",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "bottom",
+                "x": 29.5,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-bottom-75",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "bottom",
+                "x": 98.5,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-left-25",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "left",
+                "x": -5,
+                "y": 10.5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-left-75",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "left",
+                "x": -5,
+                "y": 41.5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right-25",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "right",
+                "x": 133,
+                "y": 10.5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right-75",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "right",
+                "x": 133,
+                "y": 41.5,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-bottom",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-right",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-top-25",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "top",
+                "x": 29.5,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-top-75",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "top",
+                "x": 98.5,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-bottom-25",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "bottom",
+                "x": 29.5,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-bottom-75",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "bottom",
+                "x": 98.5,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left-25",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "left",
+                "x": -5,
+                "y": 10.5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left-75",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "left",
+                "x": -5,
+                "y": 41.5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-right-25",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "right",
+                "x": 133,
+                "y": 10.5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-right-75",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "right",
+                "x": 133,
+                "y": 41.5,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 120,
+            "y": 520
+          },
+          "data": {
+            "label": "无线基站",
+            "role": "",
+            "kind": "base_station",
+            "handles": [
+              "in-top",
+              "out-top",
+              "in-bottom",
+              "out-bottom",
+              "in-left",
+              "out-left",
+              "in-right",
+              "out-right",
+              "in-top-25",
+              "out-top-25",
+              "in-top-75",
+              "out-top-75",
+              "in-bottom-25",
+              "out-bottom-25",
+              "in-bottom-75",
+              "out-bottom-75",
+              "in-left-25",
+              "out-left-25",
+              "in-left-75",
+              "out-left-75",
+              "in-right-25",
+              "out-right-25",
+              "in-right-75",
+              "out-right-75"
+            ]
+          },
+          "events": {},
+          "style": {
+            "width": "140px"
+          },
+          "zIndex": 10
+        },
+        "targetNode": {
+          "id": "img-1",
+          "type": "image",
+          "dimensions": {
+            "width": 100,
+            "height": 121
+          },
+          "computedPosition": {
+            "x": 540,
+            "y": 500,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-top",
+                "type": "source",
+                "nodeId": "img-1",
+                "position": "top",
+                "x": 44,
+                "y": -6,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "img-1",
+                "position": "bottom",
+                "x": 44,
+                "y": 114.5625,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-left",
+                "type": "source",
+                "nodeId": "img-1",
+                "position": "left",
+                "x": -6,
+                "y": 54.28125,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "img-1",
+                "position": "right",
+                "x": 94,
+                "y": 54.28125,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "img-1",
+                "position": "top",
+                "x": 44,
+                "y": -6,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-bottom",
+                "type": "target",
+                "nodeId": "img-1",
+                "position": "bottom",
+                "x": 44,
+                "y": 114.5625,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "img-1",
+                "position": "left",
+                "x": -6,
+                "y": 54.28125,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-right",
+                "type": "target",
+                "nodeId": "img-1",
+                "position": "right",
+                "x": 94,
+                "y": 54.28125,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": true,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 540,
+            "y": 500
+          },
+          "data": {
+            "label": "机器狗",
+            "src": "/assets/uploads/b80128ed.png",
+            "handles": [
+              "in-top",
+              "out-top",
+              "in-bottom",
+              "out-bottom",
+              "in-left",
+              "out-left",
+              "in-right",
+              "out-right"
+            ]
+          },
+          "events": {},
+          "style": {
+            "width": "100px"
+          },
+          "zIndex": 10
+        },
+        "sourceX": 265,
+        "sourceY": 552,
+        "targetX": 534,
+        "targetY": 560.28125,
+        "selected": false
       }
     ]
   },

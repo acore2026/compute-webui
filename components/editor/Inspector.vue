@@ -61,6 +61,27 @@
         />
       </Field>
 
+      <template v-if="selection.node.type === 'image'">
+        <Field label="上传图片">
+          <label class="upload-btn">
+            <input
+              type="file"
+              accept="image/*"
+              class="hidden"
+              @change="onImageUpload"
+            />
+            <span>{{ selection.node.data.src ? '更换图片' : '选择图片' }}</span>
+          </label>
+        </Field>
+        <div v-if="selection.node.data.src" class="px-1">
+          <img
+            :src="selection.node.data.src"
+            class="w-full rounded border border-ink-200"
+            style="max-height: 120px; object-fit: contain; background: #f8fafc;"
+          />
+        </div>
+      </template>
+
       <Field v-if="selection.node.type === 'mission'" label="Kind (类型)">
         <select
           class="settings-input"
@@ -627,6 +648,23 @@ function patchData(key: string, value: any) {
   if (!props.selection || props.selection.type !== 'node' || !props.selection.node) return
   emit('patch-node', props.selection.node.id, key, value)
 }
+
+async function onImageUpload(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  const form = new FormData()
+  form.append('file', file)
+  try {
+    const res = await $fetch<{ ok: boolean; url: string }>('/api/upload', {
+      method: 'POST',
+      body: form
+    })
+    if (res.url) patchData('src', res.url)
+  } catch (err) {
+    console.error('[upload] failed', err)
+  }
+  ;(e.target as HTMLInputElement).value = ''
+}
 function patchEdge(key: string, value: any) {
   if (!props.selection || props.selection.type !== 'edge' || !props.selection.edge) return
   emit('patch-edge', props.selection.edge.id, key, value)
@@ -748,5 +786,24 @@ const ToggleField = defineComponent({
 }
 :deep(.toggle-switch-on) .toggle-thumb {
   transform: translateX(16px);
+}
+.upload-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 32px;
+  border: 1.5px dashed var(--color-border);
+  border-radius: var(--radius-btn);
+  background: #f8fafc;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #3b82f6;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.upload-btn:hover {
+  background: rgba(59, 130, 246, 0.06);
+  border-color: #3b82f6;
 }
 </style>

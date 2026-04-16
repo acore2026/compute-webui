@@ -152,39 +152,42 @@ def _set_stage(stage_idx: int, ar: str) -> None:
     log.info("[stage] stage=%d  ar=%s", stage_idx, ar)
 
 
-# ---- simulate 演示循环 (后台协程) ----
+# ---- simulate 演示循环 (后台协程，无限循环) ----
 async def _run_simulate() -> None:
-    """按 _SIMULATE_SEQUENCE 依次推进状态，每步停留指定秒数，结束后回 INIT。"""
+    """按 _SIMULATE_SEQUENCE 无限循环推进状态。"""
     try:
-        for ar, idx, wait in _SIMULATE_SEQUENCE:
-            _set_stage(idx, ar)
-            await asyncio.sleep(wait)
-        # 停留在最后一个 stage
+        while True:
+            for ar, idx, wait in _SIMULATE_SEQUENCE:
+                _set_stage(idx, ar)
+                await asyncio.sleep(wait)
     except asyncio.CancelledError:
-        _set_stage(0, "INIT")
+        pass
 
 
-@app.post("/api/v1/stage/simulate")
-async def stage_simulate() -> dict:
-    """触发一次完整的 stage 演示流程。"""
+def _ensure_loop() -> None:
+    """确保演示循环在运行，若已停止则重新启动。"""
     global _sim_task
     if _sim_task and not _sim_task.done():
-        _sim_task.cancel()
-        try: await _sim_task
-        except (asyncio.CancelledError, Exception): pass
+        return
     _sim_task = asyncio.create_task(_run_simulate())
-    return {"ok": True, "message": "simulation started"}
+
+
+@app.on_event("startup")
+async def _auto_start_simulate() -> None:
+    """服务启动时自动开始 stage 循环。"""
+    _ensure_loop()
 
 
 @app.post("/api/v1/stage/reset")
 async def stage_reset() -> dict:
-    """停止演示并回到 INIT。"""
+    """重置到 INIT 并重新开始循环。"""
     global _sim_task
     if _sim_task and not _sim_task.done():
         _sim_task.cancel()
         try: await _sim_task
         except (asyncio.CancelledError, Exception): pass
     _set_stage(0, "INIT")
+    _ensure_loop()
     return {"ok": True}
 
 
@@ -237,7 +240,6 @@ async def _watchdog_loop() -> None:
         if _player is not None and _player.video is not None:
             try:
                 track = _player.video
-                # PlayerStreamTrack 内部的 _player 进程退了会让 readyState 变成 ended
                 if getattr(track, "readyState", "live") == "ended":
                     log.warning("[video] player track ended, resetting")
                     _reset_player()

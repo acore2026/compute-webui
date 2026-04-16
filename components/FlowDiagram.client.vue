@@ -9,6 +9,7 @@
           v-for="v in viewTabs"
           :key="v.id"
           :class="['sidebar-tab', activeView === v.id && 'sidebar-tab-active']"
+          :disabled="v.id === 'public-cloud' && currentStage !== 'MEDIA_ESTABLISHED'"
           @click="switchView(v.id)"
         >
           {{ v.label }}
@@ -19,12 +20,12 @@
     <div class="flex-1 relative">
       <!-- STAGE 悬浮条：可拖拽，位置保存到 server state -->
       <div
-        v-if="nodes.length > 0"
+        v-if="nodes.length > 0 && captionVisible"
         class="canvas-caption-card text-center"
         :key="captionKey"
         :style="{ '--caption-top': captionTop + 'px' }"
         @mousedown="onCaptionDragStart"
-        title="拖拽调整位置 (保存后持久化)"
+        title="拖拽调整位置"
       >
         <div class="canvas-caption-kicker">{{ caption.kicker }}</div>
         <h2 class="canvas-caption-title">{{ caption.title }}</h2>
@@ -97,6 +98,7 @@ import MissionEdge from './flow/MissionEdge.vue'
 import RegionNode from './flow/RegionNode.vue'
 import BusNode from './flow/BusNode.vue'
 import BarNode from './flow/BarNode.vue'
+import ImageNode from './flow/ImageNode.vue'
 import {
   loadAll,
   pushRemoteState,
@@ -110,7 +112,8 @@ const nodeTypes = {
   mission: markRaw(MissionNode),
   region:  markRaw(RegionNode),
   bus:     markRaw(BusNode),
-  bar:     markRaw(BarNode)
+  bar:     markRaw(BarNode),
+  image:   markRaw(ImageNode)
 }
 const edgeTypes = { mission: markRaw(MissionEdge) }
 
@@ -119,12 +122,14 @@ const edges = ref<Edge[]>([])
 const sequence = ref<SequenceStep[]>([])
 const legend = ref<LegendConfig>({ visible: false, items: [] })
 const captionTop = ref<number>(40)
+const captionVisible = ref(true)
 
 const viewTabs: { id: ViewId; label: string }[] = [
   { id: 'public-cloud', label: '公有云' },
   { id: 'core-network', label: '核心网' }
 ]
 const activeView = ref<ViewId>(DEFAULT_VIEW)
+const currentStage = ref('INIT')
 
 async function hydrate(view: ViewId) {
   const all = await loadAll(view)
@@ -146,6 +151,7 @@ async function hydrate(view: ViewId) {
   sequence.value = all.sequence
   legend.value = all.legend
   captionTop.value = all.captionTop
+  captionVisible.value = all.captionVisible
 }
 async function switchView(next: ViewId) {
   if (next === activeView.value) return
@@ -157,7 +163,6 @@ async function switchView(next: ViewId) {
   captionKey.value++
   await hydrate(next)
   await applyDefaultStage()
-  hasSeq.value = !!sequence.value.length
   hasNodes.value = nodes.value.length > 0
   startStagePolling()
 }
@@ -195,12 +200,7 @@ function onCaptionDragStart(e: MouseEvent) {
 
 const missionNodeCount = computed(() => nodes.value.filter(n => n.type === 'mission').length)
 
-const IDLE_CAPTION = {
-  kicker: 'READY',
-  title: '等待设备接入',
-  phase: '已就绪'
-}
-const caption = ref({ ...IDLE_CAPTION })
+const caption = ref({ kicker: '', title: '', phase: '' })
 const captionKey = ref(0)
 
 function setCaption(c: Partial<typeof caption.value>) {
@@ -212,7 +212,6 @@ function setCaption(c: Partial<typeof caption.value>) {
 async function applyDefaultStage() {
   if (sequence.value.length === 0) {
     restore()
-    setCaption({ ...IDLE_CAPTION })
     return
   }
   // 尝试从后端获取当前 stage，优先展示后端状态
@@ -324,33 +323,23 @@ function applyStep(step: SequenceStep) {
   })
 }
 
-async function simulate() {
-  if (!sequence.value.length) return
-  // 触发后端演示循环，前端通过 pollStage 自动跟随
-  try {
-    await $fetch(backendUrl('/api/v1/stage/simulate'), { method: 'POST' })
-    // 立即拉一次，减少感知延迟
-    lastStage = ''
-    pollStage()
-  } catch (e) {
-    console.warn('[simulate] backend call failed', e)
-  }
-}
-
 async function resetHighlight() {
   try {
     await $fetch(backendUrl('/api/v1/stage/reset'), { method: 'POST' })
     lastStage = ''
-    pollStage()
   } catch (e) {
     console.warn('[reset] backend call failed', e)
   }
   restore()
-  await applyDefaultStage()
+  clearHighlight()
+  // 回到第一个 step 的 caption
+  const first = sequence.value[0]
+  if (first) setCaption({ kicker: first.kicker, title: first.title, phase: first.phase })
+  // 后端循环会自动重新开始，前端通过 pollStage 跟随
 }
 
 // 注册到 header 共享 actions
-const { simulate: simRef, reset: resetRef, hasSeq, hasNodes } = useFlowActions()
+const { reset: resetRef, hasNodes } = useFlowActions()
 const { backendUrl } = useBackendIp()
 
 // ---- 核心网 stage 轮询 ----
@@ -362,14 +351,15 @@ function findStepByStage(stageName: string): SequenceStep | null {
 }
 
 async function pollStage() {
-  // 仅核心网视图需要轮询
-  if (activeView.value !== 'core-network') return
   try {
     const data = await $fetch<{ status: string; current_stage: string; scene: string }>(
       backendUrl('/api/v1/system/topology/stage')
     )
     if (!data || data.status !== 'SUCCESS') return
     const stage = data.current_stage
+    currentStage.value = stage
+    // 仅核心网视图驱动拓扑动画
+    if (activeView.value !== 'core-network') return
     if (stage === lastStage) return
     lastStage = stage
     const step = findStepByStage(stage)
@@ -386,11 +376,9 @@ async function pollStage() {
 
 function startStagePolling() {
   stopStagePolling()
-  if (activeView.value === 'core-network') {
-    lastStage = ''
-    pollStage()
-    stageTimer = setInterval(pollStage, 2000)
-  }
+  lastStage = ''
+  pollStage()
+  stageTimer = setInterval(pollStage, 2000)
 }
 
 function stopStagePolling() {
@@ -400,21 +388,24 @@ function stopStagePolling() {
 onMounted(async () => {
   await hydrate(activeView.value)
   await applyDefaultStage()
-  simRef.value = simulate
   resetRef.value = resetHighlight
-  hasSeq.value = !!sequence.value.length
   hasNodes.value = nodes.value.length > 0
   startStagePolling()
 })
-watch(sequence, v => { hasSeq.value = !!v.length }, { deep: true })
 watch(nodes, v => { hasNodes.value = v.length > 0 }, { deep: true })
+
+// 当前视图是公有云但 stage 离开 MEDIA_ESTABLISHED 时，自动切回核心网
+watch(currentStage, (stage) => {
+  if (activeView.value === 'public-cloud' && stage !== 'MEDIA_ESTABLISHED') {
+    switchView('core-network')
+  }
+})
 
 onBeforeUnmount(() => {
   timers.forEach(clearTimeout)
   stopStagePolling()
-  simRef.value = null
   resetRef.value = null
-  hasSeq.value = false
   hasNodes.value = false
 })
 </script>
+

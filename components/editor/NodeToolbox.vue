@@ -27,6 +27,10 @@
             <span style="display:inline-block; width:16px; height:3px; background:#64748b; border-radius:2px;"></span>
             <span>粗横条</span>
           </button>
+          <button class="toolbox-item" @click="$emit('add-image')" title="添加 图片节点">
+            <ImageIcon :size="16" color="#14b8a6" />
+            <span>图片节点</span>
+          </button>
         </div>
       </div>
 
@@ -75,6 +79,7 @@
 
 <script setup lang="ts">
 import { Delete } from '@element-plus/icons-vue'
+import { Image as ImageIcon } from 'lucide-vue-next'
 import { kindMeta, type NodeKind } from '../flow/kindMeta'
 import LegendEditor from './LegendEditor.vue'
 import type { LegendConfig } from '../flow/storage'
@@ -85,6 +90,7 @@ defineEmits<{
   'add-region':  [variant: 'default' | 'external' | 'mno' | 'access']
   'add-bus':     []
   'add-bar':     []
+  'add-image':   []
   'clear':       []
   'update-legend': [cfg: LegendConfig]
 }>()

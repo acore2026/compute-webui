@@ -82,16 +82,35 @@ export const DEFAULT_LEGEND: LegendConfig = { visible: false, items: [] }
 
 export const EMPTY_TOPOLOGY: Topology = { nodes: [], edges: [] }
 
+export const DEFAULT_STEP: SequenceStep = {
+  id: 'stage-1',
+  kicker: 'STAGE 1',
+  title: 'DEFAULT',
+  phase: '默认阶段',
+  nodes: [],
+  edges: []
+}
+
 /* ============================================================
    数据源：前端代码仓下的 data/topology/<view>.json
    通过 Nuxt server route /api/topology 读写，不再走 Python 后端，
    也不再使用 localStorage。
    ============================================================ */
+export interface CaptionConfig {
+  kicker: string
+  title: string
+  phase: string
+}
+
+export const DEFAULT_CAPTION: CaptionConfig = { kicker: 'READY', title: '等待设备接入', phase: '已就绪' }
+
 export interface RemoteState {
   topology: Topology | null
   sequence: SequenceStep[]
   legend: LegendConfig | null
   captionTop?: number
+  captionVisible?: boolean
+  caption?: CaptionConfig
 }
 
 export async function fetchRemoteState(view: ViewId = DEFAULT_VIEW): Promise<RemoteState | null> {
@@ -115,13 +134,17 @@ export async function loadAll(view: ViewId = DEFAULT_VIEW): Promise<{
   sequence: SequenceStep[]
   legend: LegendConfig
   captionTop: number
+  captionVisible: boolean
+  caption: CaptionConfig
 }> {
   const remote = await fetchRemoteState(view)
   const topology  = remote?.topology  ?? { nodes: [], edges: [] }
-  const sequence  = remote?.sequence  ?? []
+  const sequence  = remote?.sequence?.length ? remote.sequence : [{ ...DEFAULT_STEP }]
   const legendCfg = remote?.legend    ?? { ...DEFAULT_LEGEND }
   const captionTop = typeof remote?.captionTop === 'number' ? remote.captionTop : 40
-  return { topology, sequence, legend: legendCfg, captionTop }
+  const captionVisible = remote?.captionVisible ?? true
+  const captionCfg = remote?.caption  ?? { ...DEFAULT_CAPTION }
+  return { topology, sequence, legend: legendCfg, captionTop, captionVisible, caption: captionCfg }
 }
 
 export async function saveAll(state: RemoteState, view: ViewId = DEFAULT_VIEW) {

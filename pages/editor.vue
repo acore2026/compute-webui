@@ -45,6 +45,15 @@
           <el-icon :size="14"><Grid /></el-icon>
           <span style="font-size:0.74rem; font-weight:600;">吸附 {{ snap ? 'ON' : 'OFF' }}</span>
         </button>
+        <button
+          :class="['icon-button', captionVisible && 'is-on']"
+          style="width:auto; padding:0 12px; gap:6px;"
+          @click="captionVisible = !captionVisible"
+          :title="captionVisible ? '隐藏标题条' : '显示标题条'"
+        >
+          <el-icon :size="14"><Postcard /></el-icon>
+          <span style="font-size:0.74rem; font-weight:600;">标题 {{ captionVisible ? 'ON' : 'OFF' }}</span>
+        </button>
         <button class="icon-button" style="width:auto; padding:0 14px; gap:6px;" @click="openIo('export')">
           <el-icon :size="14"><Download /></el-icon>
           <span style="font-size:0.78rem; font-weight:600;">导出</span>
@@ -129,6 +138,7 @@
         @add-region="addRegion"
         @add-bus="addBus"
         @add-bar="addBar"
+        @add-image="addImage"
         @clear="clearCanvas"
         @update-legend="legend = $event"
       />
@@ -342,7 +352,7 @@ import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { MiniMap } from '@vue-flow/minimap'
 import {
-  Back, Check, Delete, Plus, Grid,
+  Back, Check, Delete, Plus, Grid, Postcard,
   Bottom, DArrowRight, Download, Upload, CopyDocument
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
@@ -361,6 +371,7 @@ import MissionEdge from '~/components/flow/MissionEdge.vue'
 import RegionNode from '~/components/flow/RegionNode.vue'
 import BusNode from '~/components/flow/BusNode.vue'
 import BarNode from '~/components/flow/BarNode.vue'
+import ImageNode from '~/components/flow/ImageNode.vue'
 import NodeToolbox from '~/components/editor/NodeToolbox.vue'
 import Inspector, { type Selection } from '~/components/editor/Inspector.vue'
 import SequenceBuilder from '~/components/editor/SequenceBuilder.vue'
@@ -394,7 +405,8 @@ const nodeTypes = {
   mission: markRaw(MissionNode),
   region:  markRaw(RegionNode),
   bus:     markRaw(BusNode),
-  bar:     markRaw(BarNode)
+  bar:     markRaw(BarNode),
+  image:   markRaw(ImageNode)
 }
 const edgeTypes = { mission: markRaw(MissionEdge) }
 
@@ -406,6 +418,7 @@ const playingIdx = ref(-1)
 const previewIdx = ref<number | null>(null)
 const seqCollapsed = ref(false)
 const legend = ref<LegendConfig>({ ...DEFAULT_LEGEND })
+const captionVisible = ref(true)
 
 // 选择状态
 const selectedIds = ref<string[]>([])
@@ -420,6 +433,7 @@ onMounted(async () => {
   edges.value = all.topology.edges
   sequence.value = all.sequence
   legend.value = all.legend
+  captionVisible.value = all.captionVisible
 })
 
 // 手动切换 ?view= 时重新装载
@@ -429,6 +443,7 @@ watch(activeView, async (v) => {
   edges.value = all.topology.edges
   sequence.value = all.sequence
   legend.value = all.legend
+  captionVisible.value = all.captionVisible
   selectedIds.value = []
   singleSelection.value = null
 })
@@ -557,6 +572,31 @@ function addBar() {
       style: { width: '140px', height: '28px' },
       zIndex: 10,
       data: { color: '#64748b', height: 8 }
+    }
+  ]
+  invalidateSnapshot()
+}
+
+function addImage() {
+  const id = uniqueId('img')
+  const count = nodes.value.filter(n => n.type === 'image').length
+  const baseX = 160 + (count % 5) * 180
+  const baseY = 120 + Math.floor(count / 5) * 120
+  nodes.value = [
+    ...nodes.value,
+    {
+      id, type: 'image',
+      position: { x: snapTo(baseX), y: snapTo(baseY) },
+      style: { width: '100px' },
+      zIndex: 10,
+      data: {
+        label: '机器狗',
+        src: '',
+        handles: [
+          'in-top', 'out-top', 'in-bottom', 'out-bottom',
+          'in-left', 'out-left', 'in-right', 'out-right'
+        ]
+      }
     }
   ]
   invalidateSnapshot()
@@ -821,7 +861,8 @@ async function clearCanvas() {
     topology: { nodes: [], edges: [] },
     sequence: sequence.value,
     legend:   legend.value,
-    captionTop: typeof prev?.captionTop === 'number' ? prev.captionTop : 40
+    captionTop: typeof prev?.captionTop === 'number' ? prev.captionTop : 40,
+    captionVisible: captionVisible.value
   }, view)
   ElMessage?.success?.(`已清空 · ${viewLabel.value}`)
 }
@@ -849,7 +890,8 @@ async function save() {
     topology: { nodes: cleanNodes, edges: cleanEdges },
     sequence: sequence.value,
     legend:   legend.value,
-    captionTop: typeof prev?.captionTop === 'number' ? prev.captionTop : 40
+    captionTop: typeof prev?.captionTop === 'number' ? prev.captionTop : 40,
+    captionVisible: captionVisible.value
   }, view)
   ElMessage?.success?.(`已保存并应用到首页 · ${viewLabel.value}`)
   back()
