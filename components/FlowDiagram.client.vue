@@ -151,13 +151,15 @@ async function switchView(next: ViewId) {
   if (next === activeView.value) return
   // 停掉演示、清除高亮、释放 baseSnap，避免跨视图污染
   timers.forEach(clearTimeout); timers = []
+  stopStagePolling()
   baseSnap = null
   activeView.value = next
-  caption.value = { ...DEFAULT_CAPTION }
   captionKey.value++
   await hydrate(next)
+  await applyDefaultStage()
   hasSeq.value = !!sequence.value.length
   hasNodes.value = nodes.value.length > 0
+  startStagePolling()
 }
 
 // ---- Caption 拖拽（位置保存到 server state） ----
@@ -193,17 +195,44 @@ function onCaptionDragStart(e: MouseEvent) {
 
 const missionNodeCount = computed(() => nodes.value.filter(n => n.type === 'mission').length)
 
-const DEFAULT_CAPTION = {
+const IDLE_CAPTION = {
   kicker: 'READY',
   title: '等待设备接入',
   phase: '已就绪'
 }
-const caption = ref({ ...DEFAULT_CAPTION })
+const caption = ref({ ...IDLE_CAPTION })
 const captionKey = ref(0)
 
 function setCaption(c: Partial<typeof caption.value>) {
   caption.value = { ...caption.value, ...c }
   captionKey.value++
+}
+
+/** 回到"默认态"：先从后端拉当前 stage，匹配到就展示；否则展示第一个 */
+async function applyDefaultStage() {
+  if (sequence.value.length === 0) {
+    restore()
+    setCaption({ ...IDLE_CAPTION })
+    return
+  }
+  // 尝试从后端获取当前 stage，优先展示后端状态
+  try {
+    const data = await $fetch<{ status: string; current_stage: string }>(
+      backendUrl('/api/v1/system/topology/stage')
+    )
+    if (data?.status === 'SUCCESS') {
+      lastStage = data.current_stage
+      const step = findStepByStage(data.current_stage)
+      if (step) {
+        if (!baseSnap) snapshot()
+        applyStep(step)
+        return
+      }
+    }
+  } catch {}
+  // fallback：展示第一个
+  if (!baseSnap) snapshot()
+  applyStep(sequence.value[0])
 }
 
 function clearHighlight() {
@@ -225,6 +254,7 @@ function clearHighlight() {
   }))
 }
 
+let timers: ReturnType<typeof setTimeout>[] = []
 let baseSnap: { nodes: Node[]; edges: Edge[] } | null = null
 function snapshot() {
   baseSnap = {
@@ -294,89 +324,97 @@ function applyStep(step: SequenceStep) {
   })
 }
 
-let timers: ReturnType<typeof setTimeout>[] = []
-// 通过后端广播 stage — 前端统一通过 SSE 监听 (见下方 onStageFromBackend)
-async function pushStageToBackend(idx: number) {
+async function simulate() {
+  if (!sequence.value.length) return
+  // 触发后端演示循环，前端通过 pollStage 自动跟随
   try {
-    const r = await fetch(`/api/stage/set?idx=${idx}`, { method: 'POST' })
-    if (!r.ok) throw new Error('status ' + r.status)
+    await $fetch(backendUrl('/api/v1/stage/simulate'), { method: 'POST' })
+    // 立即拉一次，减少感知延迟
+    lastStage = ''
+    pollStage()
   } catch (e) {
-    console.warn('[stage] push failed, fallback local', e)
-    if (idx < 0) { restore(); setCaption({ ...DEFAULT_CAPTION }) }
-    else if (idx < sequence.value.length) applyStep(sequence.value[idx])
+    console.warn('[simulate] backend call failed', e)
   }
 }
 
-function simulate() {
-  if (!sequence.value.length) return
-  timers.forEach(clearTimeout); timers = []
-  restore(); snapshot()
-  // 按 1.5s 间隔依次 POST 给后端；后端广播，SSE 回来触发 applyStep
-  sequence.value.forEach((_, idx) => {
-    const t = setTimeout(() => pushStageToBackend(idx), idx * 1500)
-    timers.push(t)
-  })
-  // 结束：回到 idle
-  const endT = setTimeout(
-    () => pushStageToBackend(-1),
-    sequence.value.length * 1500 + 1500,
-  )
-  timers.push(endT)
-}
-
-function resetHighlight() {
-  timers.forEach(clearTimeout); timers = []
+async function resetHighlight() {
+  try {
+    await $fetch(backendUrl('/api/v1/stage/reset'), { method: 'POST' })
+    lastStage = ''
+    pollStage()
+  } catch (e) {
+    console.warn('[reset] backend call failed', e)
+  }
   restore()
-  setCaption({ ...DEFAULT_CAPTION })
+  await applyDefaultStage()
 }
 
 // 注册到 header 共享 actions
 const { simulate: simRef, reset: resetRef, hasSeq, hasNodes } = useFlowActions()
+const { backendUrl } = useBackendIp()
 
-// ---- 后端 stage push (SSE) ----
-let stageEs: EventSource | null = null
-function connectStageStream() {
+// ---- 核心网 stage 轮询 ----
+let stageTimer: ReturnType<typeof setInterval> | null = null
+let lastStage = ''
+
+function findStepByStage(stageName: string): SequenceStep | null {
+  return sequence.value.find(s => s.title === stageName) ?? null
+}
+
+async function pollStage() {
+  // 仅核心网视图需要轮询
+  if (activeView.value !== 'core-network') return
   try {
-    stageEs = new EventSource('/api/stage/stream')
-    stageEs.onmessage = (ev) => {
-      const idx = Number(ev.data)
-      console.log('[stage sse]', ev.data, 'idx=', idx, 'seqLen=', sequence.value.length)
-      if (!Number.isFinite(idx)) return
-      if (idx < 0 || idx >= sequence.value.length) {
-        restore(); setCaption({ ...DEFAULT_CAPTION })
-        return
-      }
+    const data = await $fetch<{ status: string; current_stage: string; scene: string }>(
+      backendUrl('/api/v1/system/topology/stage')
+    )
+    if (!data || data.status !== 'SUCCESS') return
+    const stage = data.current_stage
+    if (stage === lastStage) return
+    lastStage = stage
+    const step = findStepByStage(stage)
+    if (step) {
       if (!baseSnap) snapshot()
-      applyStep(sequence.value[idx])
+      applyStep(step)
+    } else {
+      await applyDefaultStage()
     }
-    stageEs.onopen = () => console.log('[stage sse] opened')
-    stageEs.onerror = () => {
-      // EventSource 会自动重连，这里不做额外处理
-    }
-  } catch (e) {
-    console.warn('[stage] SSE unavailable', e)
+  } catch {
+    // 轮询失败静默忽略
   }
+}
+
+function startStagePolling() {
+  stopStagePolling()
+  if (activeView.value === 'core-network') {
+    lastStage = ''
+    pollStage()
+    stageTimer = setInterval(pollStage, 2000)
+  }
+}
+
+function stopStagePolling() {
+  if (stageTimer) { clearInterval(stageTimer); stageTimer = null }
 }
 
 onMounted(async () => {
   await hydrate(activeView.value)
+  await applyDefaultStage()
   simRef.value = simulate
   resetRef.value = resetHighlight
   hasSeq.value = !!sequence.value.length
   hasNodes.value = nodes.value.length > 0
-  // 重置后端 stage 状态，避免刷新后停留在上次播放的某个 stage
-  fetch('/api/stage/set?idx=-1', { method: 'POST' }).catch(() => {})
-  connectStageStream()
+  startStagePolling()
 })
 watch(sequence, v => { hasSeq.value = !!v.length }, { deep: true })
 watch(nodes, v => { hasNodes.value = v.length > 0 }, { deep: true })
 
 onBeforeUnmount(() => {
   timers.forEach(clearTimeout)
+  stopStagePolling()
   simRef.value = null
   resetRef.value = null
   hasSeq.value = false
   hasNodes.value = false
-  if (stageEs) { stageEs.close(); stageEs = null }
 })
 </script>

@@ -51,8 +51,6 @@ export default defineNuxtConfig({
         '/api/logs':    { target: 'http://localhost:8000', changeOrigin: true },
         '/api/metrics': { target: 'http://localhost:8000', changeOrigin: true },
         '/api/v1':      { target: 'http://localhost:8000', changeOrigin: true },
-        '/api/stage':   { target: 'http://localhost:8000', changeOrigin: true },
-        '/api/webrtc':  { target: 'http://localhost:8000', changeOrigin: true },
         '/stream':      { target: 'http://localhost:8000', changeOrigin: true },
       }
     }

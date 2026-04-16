@@ -120,17 +120,18 @@
 <script setup lang="ts">
 interface LogItem { id: number; time: string; level: 'INFO' | 'WARN' | 'ERROR' | 'OK'; message: string }
 
-type TabId = 'logs' | 'e2e' | 'jitter' | 'compute' | 'fps'
+type TabId = 'e2e' | 'jitter' | 'compute' | 'processing' | 'fps' | 'logs'
 
 const tabs: { id: TabId; label: string }[] = [
-  { id: 'logs',    label: '流程日志'     },
-  { id: 'e2e',     label: 'E2E latency' },
-  { id: 'jitter',  label: 'Jitter'      },
-  { id: 'compute', label: 'Comp latency'},
-  { id: 'fps',     label: 'FPS'         }
+  { id: 'e2e',        label: 'E2E latency'  },
+  { id: 'jitter',     label: 'Jitter'       },
+  { id: 'compute',    label: 'Comp latency' },
+  { id: 'processing', label: 'Proc latency' },
+  { id: 'fps',        label: 'FPS'          },
+  { id: 'logs',       label: '日志'          }
 ]
 
-const tab = ref<TabId>('logs')
+const tab = ref<TabId>('e2e')
 const logs = ref<LogItem[]>([])
 let counter = 0
 let timer: ReturnType<typeof setInterval> | null = null

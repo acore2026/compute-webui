@@ -49,23 +49,49 @@
       </template>
 
       <button
+        v-if="inEditor"
         class="icon-button"
-        :title="inEditor ? '返回首页' : '架构图编辑器'"
-        @click="toggleEditor"
+        title="返回首页"
+        @click="navigateTo('/')"
       >
-        <el-icon :size="16">
-          <Back v-if="inEditor" />
-          <Setting v-else />
-        </el-icon>
+        <el-icon :size="16"><Back /></el-icon>
       </button>
+
+      <el-dropdown v-else trigger="click" @command="onMenuCommand">
+        <button class="icon-button" title="设置">
+          <el-icon :size="16"><Setting /></el-icon>
+        </button>
+        <template #dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item command="backend-ip">
+              <el-icon :size="14"><Link /></el-icon>
+              后端地址
+            </el-dropdown-item>
+            <el-dropdown-item command="editor">
+              <el-icon :size="14"><Edit /></el-icon>
+              架构图编辑器
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
 
       <span class="font-mono text-[12px] text-ink-500 ml-2 tabular-nums">{{ now }}</span>
     </div>
+
+    <!-- 后端地址弹窗 -->
+    <el-dialog v-model="ipDialogVisible" title="后端地址" width="400px" :append-to-body="true">
+      <el-input v-model="ipDraft" placeholder="http://localhost:8000" @keyup.enter="saveIp" />
+      <template #footer>
+        <el-button @click="ipDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="saveIp">确定</el-button>
+      </template>
+    </el-dialog>
   </header>
 </template>
 
 <script setup lang="ts">
-import { Refresh, Setting, Back, VideoPlay } from '@element-plus/icons-vue'
+import { Refresh, Setting, Back, VideoPlay, Link, Edit } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 
 const route = useRoute()
 const inEditor = computed(() => route.path.startsWith('/editor'))
@@ -77,16 +103,33 @@ const reset    = computed(() => resetRef.value)
 const now = ref(formatTime(new Date()))
 let timer: ReturnType<typeof setInterval> | null = null
 
+// 后端地址
+const { backendIp, load: loadIp, save: saveBackendIp } = useBackendIp()
+const ipDialogVisible = ref(false)
+const ipDraft = ref('')
+
+function onMenuCommand(cmd: string) {
+  if (cmd === 'editor') {
+    navigateTo('/editor')
+  } else if (cmd === 'backend-ip') {
+    ipDraft.value = backendIp.value
+    ipDialogVisible.value = true
+  }
+}
+
+function saveIp() {
+  saveBackendIp(ipDraft.value)
+  ipDialogVisible.value = false
+  ElMessage.success(`后端地址已更新为 ${backendIp.value}`)
+}
+
 function formatTime(d: Date) {
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 }
 
-function toggleEditor() {
-  navigateTo(inEditor.value ? '/' : '/editor')
-}
-
 onMounted(() => {
+  loadIp()
   timer = setInterval(() => { now.value = formatTime(new Date()) }, 1000)
 })
 onBeforeUnmount(() => { if (timer) clearInterval(timer) })

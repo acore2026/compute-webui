@@ -44,18 +44,10 @@
         {{ connecting ? '连接中…' : '待推送' }}
       </div>
 
-      <!-- 手势条 · 视频上方，玻璃拟态 -->
-      <div class="glass-bar glass-bar-top">
-        <span class="glass-bar-kicker">手势</span>
-        <span class="glass-bar-dot" :style="{ background: gesture.color }"></span>
-        <span class="glass-bar-text">{{ gesture.label }}</span>
-        <span class="glass-bar-meta">置信度 {{ (gesture.confidence * 100).toFixed(0) }}%</span>
-      </div>
-
       <!-- 指令条 · 视频下方，玻璃拟态 -->
       <div class="glass-bar glass-bar-bottom">
-        <span class="glass-bar-kicker">指令</span>
-        <span class="glass-bar-text glass-bar-text-wrap">{{ prompt }}</span>
+        <span class="glass-bar-kicker">{{ arStatus }}</span>
+        <span class="glass-bar-text glass-bar-text-wrap">{{ arMessage }}</span>
       </div>
     </div>
   </section>
@@ -64,13 +56,13 @@
 <script setup lang="ts">
 import { Refresh } from '@element-plus/icons-vue'
 
-const props = defineProps<{ offerUrl?: string }>()
 const videoEl = ref<HTMLVideoElement | null>(null)
 const connected = ref(false)
 const connecting = ref(false)
 const errorMsg = ref('')
 
 let pc: RTCPeerConnection | null = null
+const { backendUrl } = useBackendIp()
 
 const statusText = computed(() =>
   connected.value ? 'Live' : connecting.value ? 'Connecting' : 'Offline'
@@ -112,14 +104,18 @@ async function connect() {
     const offer = await pc.createOffer()
     await pc.setLocalDescription(offer)
 
-    const resp = await fetch(props.offerUrl || '/api/webrtc/offer', {
+    const resp = await fetch(backendUrl('/api/v1/web/sdp/offer'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sdp: offer.sdp, type: offer.type })
+      body: JSON.stringify({
+        client_id: 'web-monitor-display-01',
+        sdp_offer: { type: offer.type, sdp: offer.sdp }
+      })
     })
     if (!resp.ok) throw new Error(`offer failed: ${resp.status}`)
-    const answer = await resp.json()
-    await pc.setRemoteDescription(answer)
+    const data = await resp.json()
+    if (!data.sdp_answer) throw new Error('No sdp_answer in response')
+    await pc.setRemoteDescription(data.sdp_answer)
   } catch (e: any) {
     errorMsg.value = String(e?.message || e)
     connecting.value = false
@@ -145,12 +141,32 @@ function reconnect() {
   nextTick(connect)
 }
 
-onMounted(connect)
-onBeforeUnmount(cleanup)
+// AR 业务状态轮询
+const arStatus = ref('INIT')
+const arMessage = ref('系统就绪，等待演示开始...')
+let arTimer: ReturnType<typeof setInterval> | null = null
 
-// 手势 / 指令（占位数据，后续可接后端）
-const gesture = ref({ label: '握拳 / FIST', confidence: 0.92, color: '#22d3ee' })
-const prompt  = ref('请把桌上的水杯递给我')
+async function fetchArStatus() {
+  try {
+    const data = await $fetch<{ status: string; ar_status: string; message: string }>(
+      backendUrl('/api/v1/system/ar/status')
+    )
+    if (data && data.status === 'SUCCESS') {
+      arStatus.value = data.ar_status
+      arMessage.value = data.message
+    }
+  } catch {}
+}
+
+onMounted(() => {
+  connect()
+  fetchArStatus()
+  arTimer = setInterval(fetchArStatus, 2000)
+})
+onBeforeUnmount(() => {
+  cleanup()
+  if (arTimer) { clearInterval(arTimer); arTimer = null }
+})
 </script>
 
 <style scoped>
@@ -176,13 +192,6 @@ const prompt  = ref('请把桌上的水杯递给我')
   z-index: 2;
 }
 
-.glass-bar-top {
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  max-width: calc(100% - 32px);
-}
-
 .glass-bar-bottom {
   bottom: 14px;
   left: 16px;
@@ -204,14 +213,6 @@ const prompt  = ref('请把桌上的水杯递给我')
   background: rgba(200, 180, 160, 0.20);
 }
 
-.glass-bar-dot {
-  flex: 0 0 auto;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.65);
-}
-
 .glass-bar-text {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 0.82rem;
@@ -225,13 +226,5 @@ const prompt  = ref('请把桌上的水杯递给我')
   line-height: 1.35;
   overflow: visible;
   text-overflow: clip;
-}
-
-.glass-bar-meta {
-  flex: 0 0 auto;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.7rem;
-  color: #8a7868;
-  font-variant-numeric: tabular-nums;
 }
 </style>

@@ -37,7 +37,7 @@ import { useMetricsHistory } from '~/composables/useMetricsHistory'
 import type { MetricsSample } from '~/composables/useMetricsHistory'
 import type { SeriesDef } from './MetricsLineChart.vue'
 
-type MetricKey = 'e2e' | 'jitter' | 'compute' | 'fps'
+type MetricKey = 'e2e' | 'jitter' | 'compute' | 'processing' | 'fps'
 
 interface MetricConfig {
   seriesKey: keyof MetricsSample
@@ -53,10 +53,11 @@ const props = defineProps<{
 const { samples, isLoading, error, refresh } = useMetricsHistory()
 
 const METRIC_CONFIG: Record<MetricKey, MetricConfig> = {
-  e2e:     { seriesKey: 'e2e_latency_ms',        label: 'E2E latency',     color: '#3b82f6', yAxisLabel: 'ms'  },
-  jitter:  { seriesKey: 'jitter_ms',             label: 'Jitter',          color: '#f59e0b', yAxisLabel: 'ms'  },
-  compute: { seriesKey: 'compute_latency_ms',    label: 'Compute latency', color: '#10b981', yAxisLabel: 'ms'  },
-  fps:     { seriesKey: 'fps',                   label: 'FPS',             color: '#2563eb', yAxisLabel: 'fps' }
+  e2e:        { seriesKey: 'e2e_latency_ms',        label: 'E2E latency',        color: '#3b82f6', yAxisLabel: 'ms'  },
+  jitter:     { seriesKey: 'jitter_ms',             label: 'Jitter',             color: '#f59e0b', yAxisLabel: 'ms'  },
+  compute:    { seriesKey: 'compute_latency_ms',    label: 'Compute latency',    color: '#10b981', yAxisLabel: 'ms'  },
+  processing: { seriesKey: 'processing_latency_ms', label: 'Processing latency', color: '#8b5cf6', yAxisLabel: 'ms'  },
+  fps:        { seriesKey: 'fps',                   label: 'FPS',                color: '#2563eb', yAxisLabel: 'fps' }
 }
 
 const config = computed(() => METRIC_CONFIG[props.metric])
