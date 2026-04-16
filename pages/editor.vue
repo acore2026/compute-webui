@@ -838,10 +838,10 @@ async function save() {
     const data = stripKeys((n.data || {}) as Record<string, any>, NODE_ANIM_ONLY)
     return { ...n, data }
   })
-  const cleanEdges = sourceEdges.map(e => {
-    const data = stripKeys((e.data || {}) as Record<string, any>, EDGE_ANIM_ONLY)
-    return { ...e, data: { ...data, state: 'idle' } }
-  })
+  const cleanEdges = sourceEdges.map(e => ({
+    ...e,
+    data: { ...((e.data as any) || {}) }
+  }))
   // 保留用户在主页拖拽后的 captionTop
   const view = activeView.value
   const prev = await fetchRemoteState(view)

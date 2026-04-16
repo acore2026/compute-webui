@@ -141,14 +141,12 @@ async function hydrate(view: ViewId) {
     return { ...n, data: cleaned }
   })
   edges.value = all.topology.edges.map(e => ({
-    ...e, data: { ...((e.data as any) || {}), state: 'idle' }
+    ...e, data: { ...((e.data as any) || {}) }
   }))
   sequence.value = all.sequence
   legend.value = all.legend
   captionTop.value = all.captionTop
 }
-hydrate(activeView.value)
-
 async function switchView(next: ViewId) {
   if (next === activeView.value) return
   // 停掉演示、清除高亮、释放 baseSnap，避免跨视图污染
@@ -304,7 +302,7 @@ async function pushStageToBackend(idx: number) {
     if (!r.ok) throw new Error('status ' + r.status)
   } catch (e) {
     console.warn('[stage] push failed, fallback local', e)
-    if (idx < 0) { restore(); clearHighlight(); setCaption({ ...DEFAULT_CAPTION }) }
+    if (idx < 0) { restore(); setCaption({ ...DEFAULT_CAPTION }) }
     else if (idx < sequence.value.length) applyStep(sequence.value[idx])
   }
 }
@@ -312,7 +310,7 @@ async function pushStageToBackend(idx: number) {
 function simulate() {
   if (!sequence.value.length) return
   timers.forEach(clearTimeout); timers = []
-  restore(); clearHighlight(); snapshot()
+  restore(); snapshot()
   // 按 1.5s 间隔依次 POST 给后端；后端广播，SSE 回来触发 applyStep
   sequence.value.forEach((_, idx) => {
     const t = setTimeout(() => pushStageToBackend(idx), idx * 1500)
@@ -328,7 +326,7 @@ function simulate() {
 
 function resetHighlight() {
   timers.forEach(clearTimeout); timers = []
-  clearHighlight()
+  restore()
   setCaption({ ...DEFAULT_CAPTION })
 }
 
@@ -345,7 +343,7 @@ function connectStageStream() {
       console.log('[stage sse]', ev.data, 'idx=', idx, 'seqLen=', sequence.value.length)
       if (!Number.isFinite(idx)) return
       if (idx < 0 || idx >= sequence.value.length) {
-        restore(); clearHighlight(); setCaption({ ...DEFAULT_CAPTION })
+        restore(); setCaption({ ...DEFAULT_CAPTION })
         return
       }
       if (!baseSnap) snapshot()
@@ -360,11 +358,14 @@ function connectStageStream() {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await hydrate(activeView.value)
   simRef.value = simulate
   resetRef.value = resetHighlight
   hasSeq.value = !!sequence.value.length
   hasNodes.value = nodes.value.length > 0
+  // 重置后端 stage 状态，避免刷新后停留在上次播放的某个 stage
+  fetch('/api/stage/set?idx=-1', { method: 'POST' }).catch(() => {})
   connectStageStream()
 })
 watch(sequence, v => { hasSeq.value = !!v.length }, { deep: true })

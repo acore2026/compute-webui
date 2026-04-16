@@ -17,7 +17,6 @@ Webfront backend — FastAPI
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import random
 from datetime import datetime
@@ -44,27 +43,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# ============================================================
-# 持久化目录 — 仅 webfront 可能写的少量状态（目前为空，保留占位）
-# 架构图配置已迁移到前端仓 data/topology/*.json，由 Nuxt server route 管理。
-# ============================================================
-DATA_DIR = Path(__file__).parent / "data"
-DATA_DIR.mkdir(parents=True, exist_ok=True)
-
-
-# ============================================================
-# /api/metrics — 实时指标 (示例数据)
-# ============================================================
-@app.get("/api/metrics")
-def metrics() -> dict:
-    return {
-        "fps":        round(24 + random.random() * 3, 1),
-        "latency_ms": round(30 + random.random() * 30, 1),
-        "gpu":        round(60 + random.random() * 30, 1),
-        "queue":      random.randint(0, 15),
-        "ts":         datetime.now().isoformat(timespec="seconds"),
-    }
 
 
 # ============================================================
@@ -241,4 +219,4 @@ async def on_shutdown():
 # ============================================================
 @app.get("/health")
 def health() -> dict:
-    return {"ok": True, "state_file": str(STATE_FILE), "state_exists": STATE_FILE.exists()}
+    return {"ok": True}

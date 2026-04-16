@@ -739,7 +739,7 @@ h1, h2, h3, h4, h5 {
 /* ---- Plan checklist 气泡 ---- */
 .mission-node-plan {
   position: absolute;
-  top: -120px;
+  bottom: calc(100% + 8px);
   right: -10px;
   width: 180px;
   padding: 8px 10px 9px;

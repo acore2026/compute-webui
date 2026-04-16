@@ -27,9 +27,9 @@
         stroke-linecap="round"
         pathLength="1"
         stroke-dasharray="0.18 0.82"
-        :class="`edge-flow-${direction}`"
+        :class="[`edge-flow-${direction}`, 'edge-flow-path']"
         :style="{
-          filter: `drop-shadow(0 0 3px ${color}) drop-shadow(0 0 6px ${color})`,
+          filter: `drop-shadow(0 0 5px ${color})`,
           animationDuration: particleDuration,
           animationDelay: tailDelay,
           opacity: 0.55,
@@ -44,9 +44,9 @@
         stroke-linecap="round"
         pathLength="1"
         stroke-dasharray="0.035 0.965"
-        :class="`edge-flow-${direction}`"
+        :class="[`edge-flow-${direction}`, 'edge-flow-path']"
         :style="{
-          filter: `drop-shadow(0 0 2px ${color}) drop-shadow(0 0 6px ${color}) drop-shadow(0 0 12px ${color})`,
+          filter: `drop-shadow(0 0 7px ${color})`,
           animationDuration: particleDuration,
           pointerEvents: 'none'
         }"
@@ -64,9 +64,9 @@
         stroke-linecap="round"
         pathLength="1"
         stroke-dasharray="0.18 0.82"
-        class="edge-flow-right-half-tail"
+        class="edge-flow-right-half-tail edge-flow-path"
         :style="{
-          filter: `drop-shadow(0 0 3px ${color}) drop-shadow(0 0 6px ${color})`,
+          filter: `drop-shadow(0 0 5px ${color})`,
           animationDuration: particleDuration,
           opacity: 0.55,
           pointerEvents: 'none'
@@ -81,9 +81,9 @@
         stroke-linecap="round"
         pathLength="1"
         stroke-dasharray="0.035 0.965"
-        class="edge-flow-right-half-head"
+        class="edge-flow-right-half-head edge-flow-path"
         :style="{
-          filter: `drop-shadow(0 0 2px ${color}) drop-shadow(0 0 6px ${color}) drop-shadow(0 0 12px ${color})`,
+          filter: `drop-shadow(0 0 7px ${color})`,
           animationDuration: particleDuration,
           pointerEvents: 'none'
         }"
@@ -97,9 +97,9 @@
         stroke-linecap="round"
         pathLength="1"
         stroke-dasharray="0.18 0.82"
-        class="edge-flow-left-half-tail"
+        class="edge-flow-left-half-tail edge-flow-path"
         :style="{
-          filter: `drop-shadow(0 0 3px ${color}) drop-shadow(0 0 6px ${color})`,
+          filter: `drop-shadow(0 0 5px ${color})`,
           animationDuration: particleDuration,
           opacity: 0.55,
           pointerEvents: 'none'
@@ -114,9 +114,9 @@
         stroke-linecap="round"
         pathLength="1"
         stroke-dasharray="0.035 0.965"
-        class="edge-flow-left-half-head"
+        class="edge-flow-left-half-head edge-flow-path"
         :style="{
-          filter: `drop-shadow(0 0 2px ${color}) drop-shadow(0 0 6px ${color}) drop-shadow(0 0 12px ${color})`,
+          filter: `drop-shadow(0 0 7px ${color})`,
           animationDuration: particleDuration,
           pointerEvents: 'none'
         }"
