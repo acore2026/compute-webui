@@ -26,6 +26,8 @@ export function useMetricsHistory(options: UseMetricsHistoryOptions = {}) {
   const error = ref<Error | null>(null)
   const lastUpdated = ref<number | null>(null)
 
+  const { backendUrl, traceCall } = useBackendIp()
+
   let timer: ReturnType<typeof setInterval> | null = null
   let inFlight: Promise<void> | null = null
   let stopped = false
@@ -33,9 +35,8 @@ export function useMetricsHistory(options: UseMetricsHistoryOptions = {}) {
   async function fetchOnce(): Promise<void> {
     isLoading.value = true
     try {
-      const body = await $fetch<MetricsHistoryResponse>(
-        `/api/v1/metrics/history?time_window=${timeWindowSec}`
-      )
+      const url = backendUrl(`/api/v1/metrics/history?time_window=${timeWindowSec}`)
+      const body = await traceCall('metrics', url, () => $fetch<MetricsHistoryResponse>(url))
       if (!body || body.status !== 'SUCCESS' || !Array.isArray(body.metrics)) {
         throw new Error(
           `Unexpected response from metrics history: status=${body?.status ?? 'null'}`

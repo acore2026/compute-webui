@@ -163,7 +163,6 @@ async function switchView(next: ViewId) {
   captionKey.value++
   await hydrate(next)
   await applyDefaultStage()
-  hasNodes.value = nodes.value.length > 0
   startStagePolling()
 }
 
@@ -216,8 +215,9 @@ async function applyDefaultStage() {
   }
   // 尝试从后端获取当前 stage，优先展示后端状态
   try {
-    const data = await $fetch<{ status: string; current_stage: string }>(
-      backendUrl('/api/v1/system/topology/stage')
+    const url = backendUrl('/api/v1/system/topology/stage')
+    const data = await traceCall('stage', url, () =>
+      $fetch<{ status: string; current_stage: string }>(url)
     )
     if (data?.status === 'SUCCESS') {
       lastStage = data.current_stage
@@ -323,24 +323,7 @@ function applyStep(step: SequenceStep) {
   })
 }
 
-async function resetHighlight() {
-  try {
-    await $fetch(backendUrl('/api/v1/stage/reset'), { method: 'POST' })
-    lastStage = ''
-  } catch (e) {
-    console.warn('[reset] backend call failed', e)
-  }
-  restore()
-  clearHighlight()
-  // 回到第一个 step 的 caption
-  const first = sequence.value[0]
-  if (first) setCaption({ kicker: first.kicker, title: first.title, phase: first.phase })
-  // 后端循环会自动重新开始，前端通过 pollStage 跟随
-}
-
-// 注册到 header 共享 actions
-const { reset: resetRef, hasNodes } = useFlowActions()
-const { backendUrl } = useBackendIp()
+const { backendUrl, traceCall } = useBackendIp()
 
 // ---- 核心网 stage 轮询 ----
 let stageTimer: ReturnType<typeof setInterval> | null = null
@@ -352,8 +335,9 @@ function findStepByStage(stageName: string): SequenceStep | null {
 
 async function pollStage() {
   try {
-    const data = await $fetch<{ status: string; current_stage: string; scene: string }>(
-      backendUrl('/api/v1/system/topology/stage')
+    const url = backendUrl('/api/v1/system/topology/stage')
+    const data = await traceCall('stage', url, () =>
+      $fetch<{ status: string; current_stage: string; scene: string }>(url)
     )
     if (!data || data.status !== 'SUCCESS') return
     const stage = data.current_stage
@@ -388,11 +372,8 @@ function stopStagePolling() {
 onMounted(async () => {
   await hydrate(activeView.value)
   await applyDefaultStage()
-  resetRef.value = resetHighlight
-  hasNodes.value = nodes.value.length > 0
   startStagePolling()
 })
-watch(nodes, v => { hasNodes.value = v.length > 0 }, { deep: true })
 
 // 当前视图是公有云但 stage 离开 MEDIA_ESTABLISHED 时，自动切回核心网
 watch(currentStage, (stage) => {
@@ -404,8 +385,6 @@ watch(currentStage, (stage) => {
 onBeforeUnmount(() => {
   timers.forEach(clearTimeout)
   stopStagePolling()
-  resetRef.value = null
-  hasNodes.value = false
 })
 </script>
 

@@ -6,9 +6,7 @@ Webfront backend — FastAPI
   2. /api/v1/system/ar/status        AR 眼镜实时业务状态（含细分子状态）
   3. /api/v1/metrics/history          指标历史曲线（模拟数据）
   4. /api/v1/web/sdp/offer            WebRTC 视频流 SDP 协商
-  5. /api/v1/stage/simulate           触发后端 stage 演示循环
-  6. /api/logs                        流程日志（模拟数据）
-  7. /health                          健康检查
+  5. /health                          健康检查
 
 启动：
   python -m pip install -r requirements.txt
@@ -20,13 +18,11 @@ from __future__ import annotations
 import asyncio
 import logging
 import random
-import time as _time
 from datetime import datetime
 from pathlib import Path
 
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
 
 # WebRTC (aiortc)
 from aiortc import RTCPeerConnection, RTCSessionDescription
@@ -78,37 +74,6 @@ def metrics_history(time_window: int = 300) -> dict:
 
 
 # ============================================================
-# /api/logs — 日志条目 (示例数据)
-# ============================================================
-_SAMPLES = [
-    ("INFO",  "接收到新帧 frame_id={fid}，开始预处理…"),
-    ("OK",    "目标检测完成，识别 3 个对象 (耗时 42ms)"),
-    ("INFO",  "推送结果到下游服务 /api/result"),
-    ("WARN",  "GPU 负载偏高 87%，启动节流策略"),
-    ("ERROR", "帧 {fid} 解码失败，已跳过"),
-]
-
-
-@app.get("/api/logs")
-def logs(limit: int = 20) -> dict:
-    limit = max(1, min(limit, 200))
-    now = datetime.now()
-    base_fid = 10000 + int(now.timestamp()) % 1000
-    items = []
-    for i in range(limit):
-        lvl, tmpl = random.choice(_SAMPLES)
-        fid = base_fid - i
-        items.append({
-            "id":      fid,
-            "time":    now.strftime("%H:%M:%S"),
-            "level":   lvl,
-            "message": tmpl.format(fid=fid),
-        })
-    # 最新在前
-    return {"items": items}
-
-
-# ============================================================
 # Stage 状态机
 # ============================================================
 #
@@ -144,6 +109,34 @@ _AR_STATUS_MAP: dict[str, str] = {
     "MEDIA_ESTABLISHED": "业务已连接，实时增强渲染中",
 }
 
+# whisper 与 gesture 相互独立，各自有独立循环，且各自可为空。
+# current_gesture 枚举：pointing_up, back, pointing_left, pointing_right, hello, palm
+# last_whisper 为常驻字段，始终有内容，每 6 秒轮换一次。
+_WHISPER_SEQUENCE: list[str] = [
+    "看看前方情况",
+    "沿着走廊走",
+    "识别一下桌上物体",
+    "停下来等一会",
+    "回到出发点",
+    "去厨房取餐",
+]
+_GESTURE_SEQUENCE: list[str] = [
+    "hello",
+    "",
+    "pointing_up",
+    "",
+    "pointing_left",
+    "palm",
+    "",
+    "pointing_right",
+    "back",
+]
+
+_current_whisper: str = _WHISPER_SEQUENCE[0]  # 常驻，启动即有值
+_current_gesture: str = ""
+_whisper_task: asyncio.Task | None = None
+_gesture_task: asyncio.Task | None = None
+
 
 def _set_stage(stage_idx: int, ar: str) -> None:
     global _current_stage, _current_ar
@@ -164,31 +157,47 @@ async def _run_simulate() -> None:
         pass
 
 
+async def _run_whisper_loop() -> None:
+    """独立循环推进 last_whisper（与 stage / gesture 无关，常驻不为空）。"""
+    global _current_whisper
+    # 启动立即赋一条，保证首次请求就有内容
+    _current_whisper = _WHISPER_SEQUENCE[0]
+    try:
+        while True:
+            for w in _WHISPER_SEQUENCE:
+                _current_whisper = w
+                await asyncio.sleep(6.0)
+    except asyncio.CancelledError:
+        pass
+
+
+async def _run_gesture_loop() -> None:
+    """独立循环推进 current_gesture（与 stage / whisper 无关）。"""
+    global _current_gesture
+    try:
+        while True:
+            for g in _GESTURE_SEQUENCE:
+                _current_gesture = g
+                await asyncio.sleep(2.5)
+    except asyncio.CancelledError:
+        pass
+
+
 def _ensure_loop() -> None:
-    """确保演示循环在运行，若已停止则重新启动。"""
-    global _sim_task
-    if _sim_task and not _sim_task.done():
-        return
-    _sim_task = asyncio.create_task(_run_simulate())
+    """确保所有演示循环都在运行。"""
+    global _sim_task, _whisper_task, _gesture_task
+    if not (_sim_task and not _sim_task.done()):
+        _sim_task = asyncio.create_task(_run_simulate())
+    if not (_whisper_task and not _whisper_task.done()):
+        _whisper_task = asyncio.create_task(_run_whisper_loop())
+    if not (_gesture_task and not _gesture_task.done()):
+        _gesture_task = asyncio.create_task(_run_gesture_loop())
 
 
 @app.on_event("startup")
 async def _auto_start_simulate() -> None:
-    """服务启动时自动开始 stage 循环。"""
+    """服务启动时自动开始 stage / whisper / gesture 循环。"""
     _ensure_loop()
-
-
-@app.post("/api/v1/stage/reset")
-async def stage_reset() -> dict:
-    """重置到 INIT 并重新开始循环。"""
-    global _sim_task
-    if _sim_task and not _sim_task.done():
-        _sim_task.cancel()
-        try: await _sim_task
-        except (asyncio.CancelledError, Exception): pass
-    _set_stage(0, "INIT")
-    _ensure_loop()
-    return {"ok": True}
 
 
 # ============================================================
@@ -316,11 +325,16 @@ def topology_stage() -> dict:
 # ============================================================
 @app.get("/api/v1/system/ar/status")
 def ar_status() -> dict:
-    """返回 AR 眼镜当前业务执行状态与提示语。"""
+    """返回 AR 眼镜当前业务执行状态与提示语。
+
+    last_whisper 与 current_gesture 彼此独立，各自可为空。
+    """
     return {
         "status": "SUCCESS",
         "ar_status": _current_ar,
         "message": _AR_STATUS_MAP.get(_current_ar, "系统就绪，等待演示开始..."),
+        "last_whisper": _current_whisper,
+        "current_gesture": _current_gesture,
         "timestamp": int(datetime.now().timestamp()),
     }
 

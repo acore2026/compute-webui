@@ -44,10 +44,24 @@
         {{ connecting ? '连接中…' : '待推送' }}
       </div>
 
-      <!-- 指令条 · 视频下方，玻璃拟态 -->
-      <div class="glass-bar glass-bar-bottom">
+      <!-- 状态条 · 视频上方，玻璃拟态 -->
+      <div class="glass-bar glass-bar-top">
         <span class="glass-bar-kicker">{{ arStatus }}</span>
         <span class="glass-bar-text glass-bar-text-wrap">{{ arMessage }}</span>
+      </div>
+
+      <!-- 对话条 · 视频下方的固定长条，左贴边、右侧给手势留位（与手势独立） -->
+      <div v-if="arWhisper" class="glass-bar glass-bar-whisper">
+        <span class="glass-bar-text glass-bar-text-wrap">“{{ arWhisper }}”</span>
+      </div>
+
+      <!-- 手势条 · 视频下方右侧（与对话相互独立） -->
+      <div v-if="arGesture" class="glass-bar glass-bar-gesture">
+        <img
+          :src="`/assets/gestures/${arGesture}.png`"
+          :alt="arGesture"
+          class="gesture-icon"
+        />
       </div>
     </div>
   </section>
@@ -62,7 +76,7 @@ const connecting = ref(false)
 const errorMsg = ref('')
 
 let pc: RTCPeerConnection | null = null
-const { backendUrl } = useBackendIp()
+const { backendUrl, traceCall } = useBackendIp()
 
 const statusText = computed(() =>
   connected.value ? 'Live' : connecting.value ? 'Connecting' : 'Offline'
@@ -104,15 +118,19 @@ async function connect() {
     const offer = await pc.createOffer()
     await pc.setLocalDescription(offer)
 
-    const resp = await fetch(backendUrl('/api/v1/web/sdp/offer'), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        client_id: 'web-monitor-display-01',
-        sdp_offer: { type: offer.type, sdp: offer.sdp }
+    const sdpUrl = backendUrl('/api/v1/web/sdp/offer')
+    const resp = await traceCall('sdp', sdpUrl, async () => {
+      const r = await fetch(sdpUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client_id: 'web-monitor-display-01',
+          sdp_offer: { type: offer.type, sdp: offer.sdp }
+        })
       })
+      if (!r.ok) throw new Error(`offer failed: ${r.status}`)
+      return r
     })
-    if (!resp.ok) throw new Error(`offer failed: ${resp.status}`)
     const data = await resp.json()
     if (!data.sdp_answer) throw new Error('No sdp_answer in response')
     await pc.setRemoteDescription(data.sdp_answer)
@@ -144,18 +162,31 @@ function reconnect() {
 // AR 业务状态轮询
 const arStatus = ref('INIT')
 const arMessage = ref('系统就绪，等待演示开始...')
+const arWhisper = ref('')
+const arGesture = ref('')
+const GESTURE_ENUM = ['pointing_up', 'back', 'pointing_left', 'pointing_right', 'hello', 'palm']
 let arTimer: ReturnType<typeof setInterval> | null = null
 
 async function fetchArStatus() {
+  const url = backendUrl('/api/v1/system/ar/status')
   try {
-    const data = await $fetch<{ status: string; ar_status: string; message: string }>(
-      backendUrl('/api/v1/system/ar/status')
-    )
+    const data = await traceCall('ar', url, () => $fetch<{
+      status: string
+      ar_status: string
+      message: string
+      last_whisper?: string
+      current_gesture?: string
+    }>(url))
     if (data && data.status === 'SUCCESS') {
       arStatus.value = data.ar_status
       arMessage.value = data.message
+      arWhisper.value = data.last_whisper ?? ''
+      const g = (data.current_gesture ?? '').trim()
+      arGesture.value = GESTURE_ENUM.includes(g) ? g : ''
     }
-  } catch {}
+  } catch {
+    // traceCall 已经在翻转边界打了 error，这里静默
+  }
 }
 
 onMounted(() => {
@@ -192,13 +223,45 @@ onBeforeUnmount(() => {
   z-index: 2;
 }
 
-.glass-bar-bottom {
-  bottom: 14px;
+.glass-bar-top {
+  top: 14px;
   left: 16px;
   right: 16px;
   border-radius: 14px;
   padding: 10px 16px;
   justify-content: flex-start;
+}
+
+/* whisper: 固定长条，左贴边、右侧与手势框间距 = 手势框距视频右边缘的间距，更对称 */
+.glass-bar-whisper {
+  bottom: 18px;
+  left: 18px;
+  right: 128px;               /* 18(视频右边距) + 92(手势框宽度) + 18(对称间距) */
+  border-radius: 14px;
+  padding: 10px 16px;
+  justify-content: flex-start;
+}
+
+.glass-bar-whisper .glass-bar-text-wrap {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.glass-bar-gesture {
+  bottom: 16px;
+  right: 18px;
+  border-radius: 16px;
+  padding: 8px;
+  justify-content: center;
+}
+
+.gesture-icon {
+  flex: 0 0 auto;
+  width: 76px;
+  height: 76px;
+  object-fit: contain;
+  display: block;
 }
 
 .glass-bar-kicker {

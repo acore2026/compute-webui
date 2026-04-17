@@ -28,18 +28,6 @@
 
     <!-- 右：首页动作 + 编辑器切换 + 时间 -->
     <div class="flex items-center gap-2">
-      <template v-if="!inEditor">
-        <button
-          class="icon-button"
-          :disabled="!hasNodes"
-          title="重置"
-          @click="reset?.()"
-        >
-          <el-icon :size="16"><Refresh /></el-icon>
-        </button>
-        <span class="mx-1 w-px h-6 bg-ink-200"></span>
-      </template>
-
       <button
         v-if="inEditor"
         class="icon-button"
@@ -88,29 +76,26 @@
 </template>
 
 <script setup lang="ts">
-import { Refresh, Setting, Back, Link, Edit } from '@element-plus/icons-vue'
+import { Setting, Back, Link, Edit } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import type { BackendIps } from '~/composables/useBackendIp'
 
 const route = useRoute()
 const inEditor = computed(() => route.path.startsWith('/editor'))
 
-const { reset: resetRef, hasNodes } = useFlowActions()
-const reset    = computed(() => resetRef.value)
-
 const now = ref(formatTime(new Date()))
 let timer: ReturnType<typeof setInterval> | null = null
 
 // 后端地址
-const { ips, load: loadIp, save: saveBackendIps } = useBackendIp()
+const { ips, load: loadIp, save: saveBackendIps, diagnose } = useBackendIp()
 const ipDialogVisible = ref(false)
-const ipDraft = ref<BackendIps>({ apiV1: '', apiLogs: '', apiMetrics: '', stream: '' })
+const ipDraft = ref<BackendIps>({ sdp: '', metrics: '', stage: '', ar: '' })
 
 const ipFields: { key: keyof BackendIps; label: string; prefix: string; placeholder: string }[] = [
-  { key: 'apiV1',      label: '业务接口',   prefix: '/api/v1/*',      placeholder: 'http://localhost:8000' },
-  { key: 'apiLogs',    label: '日志接口',   prefix: '/api/logs',      placeholder: 'http://localhost:8000' },
-  { key: 'apiMetrics', label: '指标接口',   prefix: '/api/metrics/*', placeholder: 'http://localhost:8000' },
-  { key: 'stream',     label: '流媒体',     prefix: '/stream/*',      placeholder: 'http://localhost:8000' },
+  { key: 'sdp',     label: 'SDP 协商', prefix: 'POST /api/v1/web/sdp/offer',         placeholder: 'http://localhost:8000' },
+  { key: 'metrics', label: '指标历史', prefix: 'GET  /api/v1/metrics/history',       placeholder: 'http://localhost:8000' },
+  { key: 'stage',   label: '业务阶段', prefix: 'GET  /api/v1/system/topology/stage', placeholder: 'http://localhost:8000' },
+  { key: 'ar',      label: 'AR 状态',  prefix: 'GET  /api/v1/system/ar/status',      placeholder: 'http://localhost:8000' },
 ]
 
 function onMenuCommand(cmd: string) {
@@ -126,6 +111,7 @@ function saveIp() {
   saveBackendIps(ipDraft.value)
   ipDialogVisible.value = false
   ElMessage.success('后端地址已更新')
+  diagnose('backend-ip saved')
 }
 
 function formatTime(d: Date) {
@@ -135,6 +121,7 @@ function formatTime(d: Date) {
 
 onMounted(() => {
   loadIp()
+  diagnose('backend-ip init')
   timer = setInterval(() => { now.value = formatTime(new Date()) }, 1000)
 })
 onBeforeUnmount(() => { if (timer) clearInterval(timer) })

@@ -1768,7 +1768,7 @@
             }
           ]
         },
-        "selected": true,
+        "selected": false,
         "dragging": false,
         "resizing": false,
         "initialized": false,
@@ -1779,7 +1779,7 @@
         },
         "data": {
           "label": "机器狗",
-          "src": "/assets/uploads/39fb2d03.png",
+          "src": "/assets/unitree-robotdog.png",
           "handles": [
             "in-top",
             "out-top",
@@ -1809,7 +1809,8 @@
         "data": {
           "kind": "baseline",
           "pathType": "bezier",
-          "state": "idle"
+          "state": "idle",
+          "glow": false
         },
         "events": {},
         "label": "",
@@ -2190,7 +2191,8 @@
         "data": {
           "kind": "baseline",
           "pathType": "bezier",
-          "state": "idle"
+          "state": "idle",
+          "glow": false
         },
         "events": {},
         "label": "",
@@ -2572,7 +2574,8 @@
         "data": {
           "kind": "baseline",
           "pathType": "straight",
-          "state": "idle"
+          "state": "idle",
+          "glow": false
         },
         "events": {},
         "label": "",
@@ -2760,7 +2763,8 @@
         "data": {
           "kind": "baseline",
           "pathType": "straight",
-          "state": "idle"
+          "state": "idle",
+          "glow": false
         },
         "events": {},
         "label": "",
@@ -2948,7 +2952,8 @@
         "data": {
           "kind": "baseline",
           "pathType": "straight",
-          "state": "idle"
+          "state": "idle",
+          "glow": false
         },
         "events": {},
         "label": "",
@@ -3330,7 +3335,9 @@
         "data": {
           "kind": "baseline",
           "pathType": "bezier",
-          "state": "idle"
+          "glow": true,
+          "state": "selected",
+          "direction": "forward"
         },
         "events": {},
         "label": "",
@@ -3725,7 +3732,8 @@
         "sourceX": 665,
         "sourceY": 412,
         "targetX": 815,
-        "targetY": 412
+        "targetY": 412,
+        "selected": false
       },
       {
         "id": "e-connect_agent-1-user_plane-1-mo0sxoca",
@@ -3737,7 +3745,8 @@
         "data": {
           "kind": "baseline",
           "pathType": "bezier",
-          "state": "idle"
+          "state": "idle",
+          "glow": false
         },
         "events": {},
         "label": "",
@@ -4135,635 +4144,6 @@
         "targetY": 375
       },
       {
-        "id": "e-base_station-1-user_plane-1-mo0sy0nv",
-        "type": "mission",
-        "source": "base_station-1",
-        "target": "user_plane-1",
-        "sourceHandle": "out-right-25",
-        "targetHandle": "out-left-25",
-        "data": {
-          "kind": "baseline",
-          "pathType": "straight",
-          "state": "selected",
-          "glow": false
-        },
-        "events": {},
-        "label": "",
-        "sourceNode": {
-          "id": "base_station-1",
-          "type": "mission",
-          "dimensions": {
-            "width": 140,
-            "height": 64
-          },
-          "computedPosition": {
-            "x": 120,
-            "y": 520,
-            "z": 10
-          },
-          "handleBounds": {
-            "source": [
-              {
-                "id": "out-top",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "top",
-                "x": 64,
-                "y": -5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-bottom",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "bottom",
-                "x": 64,
-                "y": 57,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-left",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "left",
-                "x": -5,
-                "y": 26,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-right",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "right",
-                "x": 133,
-                "y": 26,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-top-25",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "top",
-                "x": 29.5,
-                "y": -5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-top-75",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "top",
-                "x": 98.5,
-                "y": -5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-bottom-25",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "bottom",
-                "x": 29.5,
-                "y": 57,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-bottom-75",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "bottom",
-                "x": 98.5,
-                "y": 57,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-left-25",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "left",
-                "x": -5,
-                "y": 10.5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-left-75",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "left",
-                "x": -5,
-                "y": 41.5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-right-25",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "right",
-                "x": 133,
-                "y": 10.5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-right-75",
-                "type": "source",
-                "nodeId": "base_station-1",
-                "position": "right",
-                "x": 133,
-                "y": 41.5,
-                "width": 12,
-                "height": 12
-              }
-            ],
-            "target": [
-              {
-                "id": "in-top",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "top",
-                "x": 64,
-                "y": -5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-bottom",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "bottom",
-                "x": 64,
-                "y": 57,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-left",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "left",
-                "x": -5,
-                "y": 26,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-right",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "right",
-                "x": 133,
-                "y": 26,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-top-25",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "top",
-                "x": 29.5,
-                "y": -5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-top-75",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "top",
-                "x": 98.5,
-                "y": -5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-bottom-25",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "bottom",
-                "x": 29.5,
-                "y": 57,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-bottom-75",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "bottom",
-                "x": 98.5,
-                "y": 57,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-left-25",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "left",
-                "x": -5,
-                "y": 10.5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-left-75",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "left",
-                "x": -5,
-                "y": 41.5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-right-25",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "right",
-                "x": 133,
-                "y": 10.5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-right-75",
-                "type": "target",
-                "nodeId": "base_station-1",
-                "position": "right",
-                "x": 133,
-                "y": 41.5,
-                "width": 12,
-                "height": 12
-              }
-            ]
-          },
-          "selected": false,
-          "dragging": false,
-          "resizing": false,
-          "initialized": false,
-          "isParent": false,
-          "position": {
-            "x": 120,
-            "y": 520
-          },
-          "data": {
-            "label": "无线基站",
-            "role": "",
-            "kind": "base_station",
-            "handles": [
-              "in-top",
-              "out-top",
-              "in-bottom",
-              "out-bottom",
-              "in-left",
-              "out-left",
-              "in-right",
-              "out-right",
-              "in-top-25",
-              "out-top-25",
-              "in-top-75",
-              "out-top-75",
-              "in-bottom-25",
-              "out-bottom-25",
-              "in-bottom-75",
-              "out-bottom-75",
-              "in-left-25",
-              "out-left-25",
-              "in-left-75",
-              "out-left-75",
-              "in-right-25",
-              "out-right-25",
-              "in-right-75",
-              "out-right-75"
-            ]
-          },
-          "events": {},
-          "style": {
-            "width": "140px"
-          },
-          "zIndex": 10
-        },
-        "targetNode": {
-          "id": "user_plane-1",
-          "type": "mission",
-          "dimensions": {
-            "width": 140,
-            "height": 64
-          },
-          "computedPosition": {
-            "x": 520,
-            "y": 380,
-            "z": 10
-          },
-          "handleBounds": {
-            "source": [
-              {
-                "id": "out-top",
-                "type": "source",
-                "nodeId": "user_plane-1",
-                "position": "top",
-                "x": 64,
-                "y": -5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-bottom",
-                "type": "source",
-                "nodeId": "user_plane-1",
-                "position": "bottom",
-                "x": 64,
-                "y": 57,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-left",
-                "type": "source",
-                "nodeId": "user_plane-1",
-                "position": "left",
-                "x": -5,
-                "y": 26,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-right",
-                "type": "source",
-                "nodeId": "user_plane-1",
-                "position": "right",
-                "x": 133,
-                "y": 26,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-top-25",
-                "type": "source",
-                "nodeId": "user_plane-1",
-                "position": "top",
-                "x": 29.5,
-                "y": -5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-top-75",
-                "type": "source",
-                "nodeId": "user_plane-1",
-                "position": "top",
-                "x": 98.5,
-                "y": -5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-bottom-25",
-                "type": "source",
-                "nodeId": "user_plane-1",
-                "position": "bottom",
-                "x": 29.5,
-                "y": 57,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-bottom-75",
-                "type": "source",
-                "nodeId": "user_plane-1",
-                "position": "bottom",
-                "x": 98.5,
-                "y": 57,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-left-25",
-                "type": "source",
-                "nodeId": "user_plane-1",
-                "position": "left",
-                "x": -5,
-                "y": 10.5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-left-75",
-                "type": "source",
-                "nodeId": "user_plane-1",
-                "position": "left",
-                "x": -5,
-                "y": 41.5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-right-25",
-                "type": "source",
-                "nodeId": "user_plane-1",
-                "position": "right",
-                "x": 133,
-                "y": 10.5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "out-right-75",
-                "type": "source",
-                "nodeId": "user_plane-1",
-                "position": "right",
-                "x": 133,
-                "y": 41.5,
-                "width": 12,
-                "height": 12
-              }
-            ],
-            "target": [
-              {
-                "id": "in-top",
-                "type": "target",
-                "nodeId": "user_plane-1",
-                "position": "top",
-                "x": 64,
-                "y": -5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-bottom",
-                "type": "target",
-                "nodeId": "user_plane-1",
-                "position": "bottom",
-                "x": 64,
-                "y": 57,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-left",
-                "type": "target",
-                "nodeId": "user_plane-1",
-                "position": "left",
-                "x": -5,
-                "y": 26,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-right",
-                "type": "target",
-                "nodeId": "user_plane-1",
-                "position": "right",
-                "x": 133,
-                "y": 26,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-top-25",
-                "type": "target",
-                "nodeId": "user_plane-1",
-                "position": "top",
-                "x": 29.5,
-                "y": -5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-top-75",
-                "type": "target",
-                "nodeId": "user_plane-1",
-                "position": "top",
-                "x": 98.5,
-                "y": -5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-bottom-25",
-                "type": "target",
-                "nodeId": "user_plane-1",
-                "position": "bottom",
-                "x": 29.5,
-                "y": 57,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-bottom-75",
-                "type": "target",
-                "nodeId": "user_plane-1",
-                "position": "bottom",
-                "x": 98.5,
-                "y": 57,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-left-25",
-                "type": "target",
-                "nodeId": "user_plane-1",
-                "position": "left",
-                "x": -5,
-                "y": 10.5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-left-75",
-                "type": "target",
-                "nodeId": "user_plane-1",
-                "position": "left",
-                "x": -5,
-                "y": 41.5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-right-25",
-                "type": "target",
-                "nodeId": "user_plane-1",
-                "position": "right",
-                "x": 133,
-                "y": 10.5,
-                "width": 12,
-                "height": 12
-              },
-              {
-                "id": "in-right-75",
-                "type": "target",
-                "nodeId": "user_plane-1",
-                "position": "right",
-                "x": 133,
-                "y": 41.5,
-                "width": 12,
-                "height": 12
-              }
-            ]
-          },
-          "selected": false,
-          "dragging": false,
-          "resizing": false,
-          "initialized": false,
-          "isParent": false,
-          "position": {
-            "x": 520,
-            "y": 380
-          },
-          "data": {
-            "label": "UP",
-            "role": "",
-            "kind": "user_plane",
-            "handles": [
-              "in-top",
-              "out-top",
-              "in-bottom",
-              "out-bottom",
-              "in-left",
-              "out-left",
-              "in-right",
-              "out-right",
-              "in-top-25",
-              "out-top-25",
-              "in-top-75",
-              "out-top-75",
-              "in-bottom-25",
-              "out-bottom-25",
-              "in-bottom-75",
-              "out-bottom-75",
-              "in-left-25",
-              "out-left-25",
-              "in-left-75",
-              "out-left-75",
-              "in-right-25",
-              "out-right-25",
-              "in-right-75",
-              "out-right-75"
-            ]
-          },
-          "events": {},
-          "style": {
-            "width": "140px"
-          },
-          "zIndex": 10
-        },
-        "sourceX": 265,
-        "sourceY": 536.5,
-        "targetX": 515,
-        "targetY": 396.5,
-        "selected": false
-      },
-      {
         "id": "e-base_station-1-user_plane-1-mo0sy390",
         "type": "mission",
         "source": "base_station-1",
@@ -4773,8 +4153,9 @@
         "data": {
           "kind": "baseline",
           "pathType": "straight",
+          "glow": true,
           "state": "selected",
-          "glow": false
+          "direction": "forward"
         },
         "events": {},
         "label": "",
@@ -5402,7 +4783,9 @@
         "data": {
           "kind": "baseline",
           "pathType": "straight",
-          "state": "selected"
+          "glow": true,
+          "state": "selected",
+          "direction": "forward"
         },
         "events": {},
         "label": "",
@@ -5809,8 +5192,10 @@
         "targetHandle": "out-left",
         "data": {
           "kind": "baseline",
-          "state": "idle",
-          "pathType": "straight"
+          "pathType": "straight",
+          "glow": true,
+          "state": "selected",
+          "direction": "forward"
         },
         "events": {},
         "label": "",
@@ -6216,7 +5601,7 @@
               }
             ]
           },
-          "selected": true,
+          "selected": false,
           "dragging": false,
           "resizing": false,
           "initialized": false,
@@ -6227,7 +5612,7 @@
           },
           "data": {
             "label": "机器狗",
-            "src": "/assets/uploads/39fb2d03.png",
+            "src": "/assets/unitree-robotdog.png",
             "handles": [
               "in-top",
               "out-top",
@@ -6250,6 +5635,636 @@
         "targetX": 514,
         "targetY": 560.28125,
         "selected": false
+      },
+      {
+        "id": "e-base_station-1-user_plane-1-mo1m1nj4",
+        "type": "mission",
+        "source": "base_station-1",
+        "target": "user_plane-1",
+        "sourceHandle": "out-right-25",
+        "targetHandle": "in-left-25",
+        "data": {
+          "kind": "baseline",
+          "state": "selected",
+          "pathType": "straight",
+          "direction": "reverse",
+          "glow": true
+        },
+        "events": {},
+        "label": "",
+        "sourceNode": {
+          "id": "base_station-1",
+          "type": "mission",
+          "dimensions": {
+            "width": 140,
+            "height": 64
+          },
+          "computedPosition": {
+            "x": 120,
+            "y": 520,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-top",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-left",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-top-25",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "top",
+                "x": 29.5,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-top-75",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "top",
+                "x": 98.5,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-bottom-25",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "bottom",
+                "x": 29.5,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-bottom-75",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "bottom",
+                "x": 98.5,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-left-25",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "left",
+                "x": -5,
+                "y": 10.5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-left-75",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "left",
+                "x": -5,
+                "y": 41.5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right-25",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "right",
+                "x": 133,
+                "y": 10.5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right-75",
+                "type": "source",
+                "nodeId": "base_station-1",
+                "position": "right",
+                "x": 133,
+                "y": 41.5,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-bottom",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-right",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-top-25",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "top",
+                "x": 29.5,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-top-75",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "top",
+                "x": 98.5,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-bottom-25",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "bottom",
+                "x": 29.5,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-bottom-75",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "bottom",
+                "x": 98.5,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left-25",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "left",
+                "x": -5,
+                "y": 10.5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left-75",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "left",
+                "x": -5,
+                "y": 41.5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-right-25",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "right",
+                "x": 133,
+                "y": 10.5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-right-75",
+                "type": "target",
+                "nodeId": "base_station-1",
+                "position": "right",
+                "x": 133,
+                "y": 41.5,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 120,
+            "y": 520
+          },
+          "data": {
+            "label": "无线基站",
+            "role": "",
+            "kind": "base_station",
+            "handles": [
+              "in-top",
+              "out-top",
+              "in-bottom",
+              "out-bottom",
+              "in-left",
+              "out-left",
+              "in-right",
+              "out-right",
+              "in-top-25",
+              "out-top-25",
+              "in-top-75",
+              "out-top-75",
+              "in-bottom-25",
+              "out-bottom-25",
+              "in-bottom-75",
+              "out-bottom-75",
+              "in-left-25",
+              "out-left-25",
+              "in-left-75",
+              "out-left-75",
+              "in-right-25",
+              "out-right-25",
+              "in-right-75",
+              "out-right-75"
+            ]
+          },
+          "events": {},
+          "style": {
+            "width": "140px"
+          },
+          "zIndex": 10
+        },
+        "targetNode": {
+          "id": "user_plane-1",
+          "type": "mission",
+          "dimensions": {
+            "width": 140,
+            "height": 64
+          },
+          "computedPosition": {
+            "x": 520,
+            "y": 380,
+            "z": 10
+          },
+          "handleBounds": {
+            "source": [
+              {
+                "id": "out-top",
+                "type": "source",
+                "nodeId": "user_plane-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-bottom",
+                "type": "source",
+                "nodeId": "user_plane-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-left",
+                "type": "source",
+                "nodeId": "user_plane-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right",
+                "type": "source",
+                "nodeId": "user_plane-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-top-25",
+                "type": "source",
+                "nodeId": "user_plane-1",
+                "position": "top",
+                "x": 29.5,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-top-75",
+                "type": "source",
+                "nodeId": "user_plane-1",
+                "position": "top",
+                "x": 98.5,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-bottom-25",
+                "type": "source",
+                "nodeId": "user_plane-1",
+                "position": "bottom",
+                "x": 29.5,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-bottom-75",
+                "type": "source",
+                "nodeId": "user_plane-1",
+                "position": "bottom",
+                "x": 98.5,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-left-25",
+                "type": "source",
+                "nodeId": "user_plane-1",
+                "position": "left",
+                "x": -5,
+                "y": 10.5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-left-75",
+                "type": "source",
+                "nodeId": "user_plane-1",
+                "position": "left",
+                "x": -5,
+                "y": 41.5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right-25",
+                "type": "source",
+                "nodeId": "user_plane-1",
+                "position": "right",
+                "x": 133,
+                "y": 10.5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "out-right-75",
+                "type": "source",
+                "nodeId": "user_plane-1",
+                "position": "right",
+                "x": 133,
+                "y": 41.5,
+                "width": 12,
+                "height": 12
+              }
+            ],
+            "target": [
+              {
+                "id": "in-top",
+                "type": "target",
+                "nodeId": "user_plane-1",
+                "position": "top",
+                "x": 64,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-bottom",
+                "type": "target",
+                "nodeId": "user_plane-1",
+                "position": "bottom",
+                "x": 64,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left",
+                "type": "target",
+                "nodeId": "user_plane-1",
+                "position": "left",
+                "x": -5,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-right",
+                "type": "target",
+                "nodeId": "user_plane-1",
+                "position": "right",
+                "x": 133,
+                "y": 26,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-top-25",
+                "type": "target",
+                "nodeId": "user_plane-1",
+                "position": "top",
+                "x": 29.5,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-top-75",
+                "type": "target",
+                "nodeId": "user_plane-1",
+                "position": "top",
+                "x": 98.5,
+                "y": -5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-bottom-25",
+                "type": "target",
+                "nodeId": "user_plane-1",
+                "position": "bottom",
+                "x": 29.5,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-bottom-75",
+                "type": "target",
+                "nodeId": "user_plane-1",
+                "position": "bottom",
+                "x": 98.5,
+                "y": 57,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left-25",
+                "type": "target",
+                "nodeId": "user_plane-1",
+                "position": "left",
+                "x": -5,
+                "y": 10.5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-left-75",
+                "type": "target",
+                "nodeId": "user_plane-1",
+                "position": "left",
+                "x": -5,
+                "y": 41.5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-right-25",
+                "type": "target",
+                "nodeId": "user_plane-1",
+                "position": "right",
+                "x": 133,
+                "y": 10.5,
+                "width": 12,
+                "height": 12
+              },
+              {
+                "id": "in-right-75",
+                "type": "target",
+                "nodeId": "user_plane-1",
+                "position": "right",
+                "x": 133,
+                "y": 41.5,
+                "width": 12,
+                "height": 12
+              }
+            ]
+          },
+          "selected": false,
+          "dragging": false,
+          "resizing": false,
+          "initialized": false,
+          "isParent": false,
+          "position": {
+            "x": 520,
+            "y": 380
+          },
+          "data": {
+            "label": "UP",
+            "role": "",
+            "kind": "user_plane",
+            "handles": [
+              "in-top",
+              "out-top",
+              "in-bottom",
+              "out-bottom",
+              "in-left",
+              "out-left",
+              "in-right",
+              "out-right",
+              "in-top-25",
+              "out-top-25",
+              "in-top-75",
+              "out-top-75",
+              "in-bottom-25",
+              "out-bottom-25",
+              "in-bottom-75",
+              "out-bottom-75",
+              "in-left-25",
+              "out-left-25",
+              "in-left-75",
+              "out-left-75",
+              "in-right-25",
+              "out-right-25",
+              "in-right-75",
+              "out-right-75"
+            ]
+          },
+          "events": {},
+          "style": {
+            "width": "140px"
+          },
+          "zIndex": 10
+        },
+        "sourceX": 265,
+        "sourceY": 536.5,
+        "targetX": 515,
+        "targetY": 396.5,
+        "selected": true
       }
     ]
   },
@@ -6258,9 +6273,45 @@
       "id": "stage-1",
       "kicker": "STAGE",
       "title": "MEDIA_ESTABLISHED",
-      "phase": "",
-      "nodes": [],
-      "edges": []
+      "phase": "业务面完全建立，实时推理与控制阶段",
+      "nodes": [
+        "glass"
+      ],
+      "edges": [
+        "e-base_station-1-user_plane-1-mo0sy0nv",
+        "e-base_station-1-user_plane-1-mo0sy390",
+        "e-base_station-1-glass-mo0sycwu",
+        "e-user_plane-1-aic-1-mo0sxhvd",
+        "e-base_station-1-img-1-mo1k3g15",
+        "e-base_station-1-user_plane-1-mo1m1nj4"
+      ],
+      "edgeSettings": {
+        "e-base_station-1-user_plane-1-mo0sy0nv": {
+          "glow": true
+        },
+        "e-base_station-1-user_plane-1-mo0sy390": {
+          "glow": true
+        },
+        "e-base_station-1-glass-mo0sycwu": {
+          "glow": true
+        },
+        "e-user_plane-1-aic-1-mo0sxhvd": {
+          "glow": true
+        },
+        "e-base_station-1-img-1-mo1k3g15": {
+          "glow": true
+        },
+        "e-base_station-1-user_plane-1-mo1m1nj4": {
+          "glow": true,
+          "direction": "reverse"
+        }
+      },
+      "nodeSettings": {
+        "glass": {
+          "flashActive": false,
+          "active": false
+        }
+      }
     }
   ],
   "legend": {
