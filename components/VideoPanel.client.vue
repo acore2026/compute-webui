@@ -41,7 +41,7 @@
           color: #64748b;
         "
       >
-        {{ connecting ? '连接中…' : '待推送' }}
+        {{ connecting ? '连接中…' : '等待视频连接' }}
       </div>
 
       <!-- 状态条 · 视频上方，玻璃拟态 -->
@@ -70,12 +70,16 @@
 <script setup lang="ts">
 import { Refresh } from '@element-plus/icons-vue'
 
-const videoEl = ref<HTMLVideoElement | null>(null)
-const connected = ref(false)
-const connecting = ref(false)
-const errorMsg = ref('')
-
-let pc: RTCPeerConnection | null = null
+const {
+  videoEl,
+  connected,
+  connecting,
+  start,
+  reconnect,
+  stop
+} = usePassiveVideoPeer({
+  clientId: 'web-monitor-display-01'
+})
 const { backendUrl, traceCall } = useBackendIp()
 
 const statusText = computed(() =>
@@ -86,78 +90,6 @@ const statusBadgeClass = computed(() =>
     : connecting.value ? 'status-badge-accent'
     : 'status-badge-idle'
 )
-
-async function connect() {
-  if (connecting.value || connected.value) return
-  if (typeof window === 'undefined' || !window.RTCPeerConnection) return
-  connecting.value = true
-  errorMsg.value = ''
-  try {
-    pc = new RTCPeerConnection({ iceServers: [] })
-
-    pc.ontrack = (e) => {
-      if (videoEl.value && e.streams[0]) {
-        videoEl.value.srcObject = e.streams[0]
-      }
-    }
-    pc.onconnectionstatechange = () => {
-      const s = pc?.connectionState
-      if (s === 'connected') {
-        connected.value = true
-        connecting.value = false
-      }
-      if (s === 'failed' || s === 'closed' || s === 'disconnected') {
-        connected.value = false
-        connecting.value = false
-      }
-    }
-
-    // 只接收视频
-    pc.addTransceiver('video', { direction: 'recvonly' })
-
-    const offer = await pc.createOffer()
-    await pc.setLocalDescription(offer)
-
-    const sdpUrl = backendUrl('/api/v1/web/sdp/offer')
-    const resp = await traceCall('sdp', sdpUrl, async () => {
-      const r = await fetch(sdpUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          client_id: 'web-monitor-display-01',
-          sdp_offer: { type: offer.type, sdp: offer.sdp }
-        })
-      })
-      if (!r.ok) throw new Error(`offer failed: ${r.status}`)
-      return r
-    })
-    const data = await resp.json()
-    if (!data.sdp_answer) throw new Error('No sdp_answer in response')
-    await pc.setRemoteDescription(data.sdp_answer)
-  } catch (e: any) {
-    errorMsg.value = String(e?.message || e)
-    connecting.value = false
-    connected.value = false
-    cleanup()
-  }
-}
-
-function cleanup() {
-  if (pc) {
-    try { pc.close() } catch {}
-    pc = null
-  }
-  if (videoEl.value) {
-    videoEl.value.srcObject = null
-  }
-}
-
-function reconnect() {
-  cleanup()
-  connected.value = false
-  connecting.value = false
-  nextTick(connect)
-}
 
 // AR 业务状态轮询
 const arStatus = ref('INIT')
@@ -190,12 +122,12 @@ async function fetchArStatus() {
 }
 
 onMounted(() => {
-  connect()
+  start()
   fetchArStatus()
   arTimer = setInterval(fetchArStatus, 2000)
 })
 onBeforeUnmount(() => {
-  cleanup()
+  stop()
   if (arTimer) { clearInterval(arTimer); arTimer = null }
 })
 </script>
