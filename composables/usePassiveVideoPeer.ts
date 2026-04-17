@@ -1,4 +1,5 @@
 import type { Ref } from 'vue'
+import { buildPublishedOfferDescription } from './passiveVideoOffer'
 
 const DEFAULT_RECONNECT_DELAY_MS = 1500
 const DEFAULT_CONNECT_TIMEOUT_MS = 8000
@@ -103,6 +104,11 @@ export function usePassiveVideoPeer(options: PassiveVideoPeerOptions) {
     currentPc.addTransceiver('video', { direction: 'recvonly' })
     const offer = await currentPc.createOffer()
     await currentPc.setLocalDescription(offer)
+    const publishedOffer = await buildPublishedOfferDescription(
+      currentPc,
+      { type: offer.type, sdp: offer.sdp ?? '' },
+      DEFAULT_CONNECT_TIMEOUT_MS
+    )
 
     const url = backendUrl(offerPath)
     const response = await traceCall('sdp', url, async () => {
@@ -111,7 +117,7 @@ export function usePassiveVideoPeer(options: PassiveVideoPeerOptions) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           client_id: clientId,
-          sdp_offer: { type: offer.type, sdp: offer.sdp }
+          sdp_offer: publishedOffer
         })
       })
       if (!result.ok) throw new Error(`offer failed: ${result.status}`)
