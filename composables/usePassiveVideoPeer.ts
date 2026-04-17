@@ -1,6 +1,7 @@
 import type { Ref } from 'vue'
 
 const DEFAULT_RECONNECT_DELAY_MS = 1500
+const DEFAULT_CONNECT_TIMEOUT_MS = 8000
 
 export interface PassiveVideoPeerOptions {
   clientId: string
@@ -30,12 +31,20 @@ export function usePassiveVideoPeer(options: PassiveVideoPeerOptions) {
 
   let pc: RTCPeerConnection | null = null
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null
+  let connectWatchdog: ReturnType<typeof setTimeout> | null = null
   let stopped = false
 
   function cancelReconnectTimer() {
     if (reconnectTimer) {
       clearTimeout(reconnectTimer)
       reconnectTimer = null
+    }
+  }
+
+  function cancelConnectWatchdog() {
+    if (connectWatchdog) {
+      clearTimeout(connectWatchdog)
+      connectWatchdog = null
     }
   }
 
@@ -79,11 +88,14 @@ export function usePassiveVideoPeer(options: PassiveVideoPeerOptions) {
         connecting.value = false
         errorMsg.value = ''
         cancelReconnectTimer()
+        cancelConnectWatchdog()
         return
       }
       if (state === 'failed' || state === 'closed' || state === 'disconnected') {
         connected.value = false
         connecting.value = false
+        clearMedia(videoEl)
+        cleanupPeer(currentPc)
         scheduleReconnect()
       }
     }
@@ -108,6 +120,15 @@ export function usePassiveVideoPeer(options: PassiveVideoPeerOptions) {
     const payload = await response.json()
     if (!payload?.sdp_answer) throw new Error('No sdp_answer in response')
     await currentPc.setRemoteDescription(payload.sdp_answer)
+    cancelConnectWatchdog()
+    connectWatchdog = setTimeout(() => {
+      if (pc !== currentPc || stopped || currentPc.connectionState === 'connected') return
+      connected.value = false
+      connecting.value = false
+      clearMedia(videoEl)
+      cleanupPeer(currentPc)
+      scheduleReconnect()
+    }, DEFAULT_CONNECT_TIMEOUT_MS)
   }
 
   async function start() {
@@ -123,6 +144,7 @@ export function usePassiveVideoPeer(options: PassiveVideoPeerOptions) {
       errorMsg.value = String(error?.message || error)
       connecting.value = false
       connected.value = false
+      cancelConnectWatchdog()
       cleanupPeer()
       clearMedia(videoEl)
       scheduleReconnect()
@@ -132,6 +154,7 @@ export function usePassiveVideoPeer(options: PassiveVideoPeerOptions) {
   function stop() {
     stopped = true
     cancelReconnectTimer()
+    cancelConnectWatchdog()
     connecting.value = false
     connected.value = false
     cleanupPeer()

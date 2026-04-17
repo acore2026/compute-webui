@@ -22,6 +22,7 @@ npm run dev
 
 - 页面启动后会立即尝试与 `sandbox` 建立 WebRTC 视频连接
 - 前端不负责判断业务状态，只被动显示 `sandbox` 当前输出的流
+- 首次协商失败、收到 answer 后长期未进入 `connected`、或连接中途 `failed/disconnected` 时，前端会清理旧 peer 并自动重试
 - 眼镜未连上或狗视频尚未接入时，`sandbox` 会输出占位流
 - 狗视频接入后，`sandbox` 会在原有连接内切成 YOLO 处理后的视频
 - 眼镜退出或触发 `hot_reset` 后，前端连接保留，视频回退为占位流
