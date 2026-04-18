@@ -107,6 +107,11 @@ import {
   type LegendConfig,
   type ViewId
 } from './flow/storage'
+import {
+  fetchTransportModeFromSandboxHealth,
+  resolveTopologyViewFromBackendState,
+  syncTransportModeForTopologyView
+} from '../composables/topologyTransportMode'
 
 const nodeTypes = {
   mission: markRaw(MissionNode),
@@ -153,8 +158,11 @@ async function hydrate(view: ViewId) {
   captionTop.value = all.captionTop
   captionVisible.value = all.captionVisible
 }
-async function switchView(next: ViewId) {
+async function activateView(next: ViewId, syncTransportMode = false) {
   if (next === activeView.value) return
+  if (syncTransportMode) {
+    await syncTransportModeForTopologyView(next, { backendUrl, traceCall })
+  }
   // 停掉演示、清除高亮、释放 baseSnap，避免跨视图污染
   timers.forEach(clearTimeout); timers = []
   stopStagePolling()
@@ -164,6 +172,14 @@ async function switchView(next: ViewId) {
   await hydrate(next)
   await applyDefaultStage()
   startStagePolling()
+}
+
+async function switchView(next: ViewId) {
+  try {
+    await activateView(next, true)
+  } catch (error) {
+    console.warn('[topology] transport mode sync failed', error)
+  }
 }
 
 // ---- Caption 拖拽（位置保存到 server state） ----
@@ -208,10 +224,10 @@ function setCaption(c: Partial<typeof caption.value>) {
 }
 
 /** 回到"默认态"：先从后端拉当前 stage，匹配到就展示；否则展示第一个 */
-async function applyDefaultStage() {
+async function applyDefaultStage(): Promise<string> {
   if (sequence.value.length === 0) {
     restore()
-    return
+    return currentStage.value
   }
   // 尝试从后端获取当前 stage，优先展示后端状态
   try {
@@ -220,18 +236,20 @@ async function applyDefaultStage() {
       $fetch<{ status: string; current_stage: string }>(url)
     )
     if (data?.status === 'SUCCESS') {
+      currentStage.value = data.current_stage
       lastStage = data.current_stage
       const step = findStepByStage(data.current_stage)
       if (step) {
         if (!baseSnap) snapshot()
         applyStep(step)
-        return
+        return data.current_stage
       }
     }
   } catch {}
   // fallback：展示第一个
   if (!baseSnap) snapshot()
   applyStep(sequence.value[0])
+  return currentStage.value
 }
 
 function clearHighlight() {
@@ -325,6 +343,16 @@ function applyStep(step: SequenceStep) {
 
 const { backendUrl, traceCall } = useBackendIp()
 
+async function syncInitialTopologyView(stage: string) {
+  try {
+    const transportMode = await fetchTransportModeFromSandboxHealth({ backendUrl, traceCall })
+    const desiredView = resolveTopologyViewFromBackendState(stage, transportMode)
+    await activateView(desiredView, false)
+  } catch {
+    // sandbox health unavailable should not block the diagram
+  }
+}
+
 // ---- 核心网 stage 轮询 ----
 let stageTimer: ReturnType<typeof setInterval> | null = null
 let lastStage = ''
@@ -371,7 +399,8 @@ function stopStagePolling() {
 
 onMounted(async () => {
   await hydrate(activeView.value)
-  await applyDefaultStage()
+  const stage = await applyDefaultStage()
+  await syncInitialTopologyView(stage)
   startStagePolling()
 })
 
@@ -387,4 +416,3 @@ onBeforeUnmount(() => {
   stopStagePolling()
 })
 </script>
-
