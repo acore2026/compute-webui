@@ -1,5 +1,6 @@
 import type { Ref } from 'vue'
 import { buildPublishedOfferDescription } from './passiveVideoOffer'
+import { buildPassiveVideoRtcConfiguration } from './passiveVideoRtcConfig'
 
 const DEFAULT_RECONNECT_DELAY_MS = 1500
 const DEFAULT_CONNECT_TIMEOUT_MS = 8000
@@ -72,7 +73,7 @@ export function usePassiveVideoPeer(options: PassiveVideoPeerOptions) {
   }
 
   async function connectOnce(): Promise<void> {
-    const currentPc = new RTCPeerConnection({ iceServers: [] })
+    const currentPc = new RTCPeerConnection(buildPassiveVideoRtcConfiguration())
     pc = currentPc
 
     currentPc.ontrack = (event) => {
