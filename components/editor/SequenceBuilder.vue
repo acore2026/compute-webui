@@ -85,6 +85,18 @@
               （画布上点元素 → Inspector 改动即自动加入）
             </span>
           </div>
+          <div v-if="regions.length" class="flex flex-wrap gap-1.5">
+            <button
+              v-for="region in regions"
+              :key="`${step.id}-${region.id}`"
+              class="chip-btn"
+              :class="isRegionVisible(step, idx, region) && 'chip-btn-on'"
+              type="button"
+              @click="toggleRegionVisibility(idx, region)"
+            >
+              {{ region.label }} · {{ isRegionVisible(step, idx, region) ? '显示' : '隐藏' }}
+            </button>
+          </div>
         </div>
 
         <div class="flex flex-col gap-1">
@@ -110,7 +122,7 @@
             style="color: #b91c1c;"
             @click="remove(idx)"
             title="删除"
-            :disabled="steps.length <= 1"
+            :disabled="idx === 0 || steps.length <= 1"
           >
             <el-icon :size="12"><Delete /></el-icon>
           </button>
@@ -127,6 +139,7 @@ import type { SequenceStep } from '../flow/storage'
 const props = defineProps<{
   steps: SequenceStep[]
   nodeIds: string[]
+  regions: { id: string; label: string; hidden?: boolean }[]
   edgeIds: string[]
   playingIdx: number
   previewIdx?: number
@@ -140,6 +153,7 @@ const emit = defineEmits<{
   'preview': [idx: number | null]
   'sync-preview': [idx: number]
   'focus': [type: 'node' | 'edge', id: string]
+  'toggle-region-visibility': [stepIdx: number, id: string, visible: boolean]
 }>()
 
 function togglePreview(idx: number) {
@@ -221,6 +235,7 @@ function toggle(idx: number, key: 'nodes' | 'edges', id: string) {
 
 function move(idx: number, delta: number) {
   const to = idx + delta
+  if (idx === 0 || to === 0) return
   if (to < 0 || to >= props.steps.length) return
   const next = props.steps.slice()
   const [item] = next.splice(idx, 1)
@@ -229,9 +244,30 @@ function move(idx: number, delta: number) {
 }
 
 function remove(idx: number) {
+  if (idx === 0) return
   const next = props.steps.slice()
   next.splice(idx, 1)
   update(next)
+}
+
+function isRegionVisible(
+  step: SequenceStep,
+  stepIdx: number,
+  region: { id: string; label: string; hidden?: boolean }
+) {
+  if (stepIdx === 0) return !region.hidden
+  const override = step.nodeSettings?.[region.id] as Record<string, any> | undefined
+  if (typeof override?.hidden === 'boolean') return !override.hidden
+  return !region.hidden
+}
+
+function toggleRegionVisibility(
+  stepIdx: number,
+  region: { id: string; label: string; hidden?: boolean }
+) {
+  const step = props.steps[stepIdx]
+  if (!step) return
+  emit('toggle-region-visibility', stepIdx, region.id, !isRegionVisible(step, stepIdx, region))
 }
 
 function play() { emit('play') }

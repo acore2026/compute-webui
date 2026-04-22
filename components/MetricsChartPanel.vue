@@ -2,7 +2,7 @@
   <div class="metrics-chart-panel">
     <div v-if="showLoading" class="state-block">
       <div class="spinner"></div>
-      <div class="state-text">加载指标…</div>
+      <div class="state-text">加载指标中</div>
     </div>
 
     <template v-else-if="showEmpty">
@@ -17,60 +17,104 @@
 
     <template v-else>
       <div v-if="error" class="error-banner">
-        <span class="error-text">{{ errorMessage }}（展示最近一次成功的数据）</span>
+        <span class="error-text">{{ errorMessage }}，展示最近一次成功的数据</span>
         <button class="retry-btn" @click="onRetry">重试</button>
       </div>
 
-      <div class="chart-body">
-        <MetricsLineChart
-          :samples="samples"
-          :series="seriesForMetric"
-          :y-axis-label="config.yAxisLabel"
-        />
+      <div class="chart-grid">
+        <section class="chart-card">
+          <MetricsLiveValueHeader
+            primary-label="E2E latency"
+            :primary-value="latestCoreE2E"
+            secondary-label="OTT"
+            :secondary-value="latestOttE2E"
+            unit="ms"
+            :digits="1"
+          />
+          <div class="chart-body">
+            <MetricsLineChart
+              :samples="samples"
+              :ott-samples="ottSamples"
+              :average="average"
+              :ott-average="ottAverage"
+              :stage="currentStage"
+              metric-key="e2e_latency_ms"
+              :series="e2eSeries"
+              y-axis-label="ms"
+            />
+          </div>
+        </section>
+
+        <section class="chart-card">
+          <MetricsLiveValueHeader
+            primary-label="FPS"
+            :primary-value="latestFps"
+            unit="fps"
+            :digits="1"
+          />
+          <div class="chart-body">
+            <MetricsLineChart
+              :samples="samples"
+              :stage="currentStage"
+              metric-key="fps"
+              :series="fpsSeries"
+              y-axis-label="fps"
+            />
+          </div>
+        </section>
       </div>
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useMetricsHistory } from '~/composables/useMetricsHistory'
-import type { MetricsSample } from '~/composables/useMetricsHistory'
 import type { SeriesDef } from './MetricsLineChart.vue'
 
-type MetricKey = 'e2e' | 'jitter' | 'compute' | 'processing' | 'fps'
+const { samples, ottSamples, average, ottAverage, isLoading, error, refresh } = useMetricsHistory()
+const activeView = useTopologyView()
+const currentStage = useSystemStage()
 
-interface MetricConfig {
-  seriesKey: keyof MetricsSample
-  label: string
-  color: string
-  yAxisLabel: string
-}
+const e2eSeries = computed<SeriesDef[]>(() => {
+  const series: SeriesDef[] = [
+    {
+      key: 'e2e_latency_ms',
+      label: 'E2E latency',
+      color: '#3b82f6'
+    }
+  ]
 
-const props = defineProps<{
-  metric: MetricKey
-}>()
+  if (activeView.value === 'public-cloud' && ottSamples.value.length > 0) {
+    series.push({
+      key: 'e2e_latency_ms',
+      label: 'E2E latency · OTT',
+      color: '#f97316',
+      sampleSource: 'ott'
+    })
+  }
 
-const { samples, isLoading, error, refresh } = useMetricsHistory()
+  return series
+})
 
-const METRIC_CONFIG: Record<MetricKey, MetricConfig> = {
-  e2e:        { seriesKey: 'e2e_latency_ms',        label: 'E2E latency',        color: '#3b82f6', yAxisLabel: 'ms'  },
-  jitter:     { seriesKey: 'jitter_ms',             label: 'Jitter',             color: '#f59e0b', yAxisLabel: 'ms'  },
-  compute:    { seriesKey: 'compute_latency_ms',    label: 'Compute latency',    color: '#10b981', yAxisLabel: 'ms'  },
-  processing: { seriesKey: 'processing_latency_ms', label: 'Processing latency', color: '#8b5cf6', yAxisLabel: 'ms'  },
-  fps:        { seriesKey: 'fps',                   label: 'FPS',                color: '#2563eb', yAxisLabel: 'fps' }
-}
+const fpsSeries = computed<SeriesDef[]>(() => [
+  {
+    key: 'fps',
+    label: 'FPS',
+    color: '#2563eb'
+  }
+])
 
-const config = computed(() => METRIC_CONFIG[props.metric])
-
-const seriesForMetric = computed<SeriesDef[]>(() => [{
-  key:   config.value.seriesKey,
-  label: config.value.label,
-  color: config.value.color
-}])
-
-const showLoading  = computed(() => isLoading.value && samples.value.length === 0 && !error.value)
-const showEmpty    = computed(() => !isLoading.value && samples.value.length === 0)
-const errorMessage = computed(() => (error.value ? (error.value.message || '请求失败') : ''))
+const latestCoreSample = computed(() => samples.value[samples.value.length - 1] ?? null)
+const latestOttSample = computed(() => ottSamples.value[ottSamples.value.length - 1] ?? null)
+const latestCoreE2E = computed(() => latestCoreSample.value?.e2e_latency_ms ?? null)
+const latestOttE2E = computed(() =>
+  activeView.value === 'public-cloud' && ottSamples.value.length > 0
+    ? latestOttSample.value?.e2e_latency_ms ?? null
+    : undefined
+)
+const latestFps = computed(() => latestCoreSample.value?.fps ?? null)
+const showLoading = computed(() => isLoading.value && samples.value.length === 0 && !error.value)
+const showEmpty = computed(() => !isLoading.value && samples.value.length === 0)
+const errorMessage = computed(() => (error.value ? error.value.message || '请求失败' : ''))
 
 function onRetry() {
   void refresh()
@@ -88,6 +132,31 @@ function onRetry() {
   overflow: hidden;
 }
 
+.chart-grid {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.chart-card {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
+}
+
+.chart-body {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0 8px 8px;
+}
+
 .state-block {
   flex: 1 1 auto;
   display: flex;
@@ -98,10 +167,12 @@ function onRetry() {
   color: #64748b;
   min-height: 0;
 }
+
 .state-text {
   font-size: 0.78rem;
   letter-spacing: 0.02em;
 }
+
 .state-empty {
   opacity: 0.75;
 }
@@ -114,6 +185,7 @@ function onRetry() {
   border-top-color: #3b82f6;
   animation: spin 0.9s linear infinite;
 }
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -131,11 +203,13 @@ function onRetry() {
   font-size: 0.72rem;
   flex: 0 0 auto;
 }
+
 .error-text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 .retry-btn {
   flex: 0 0 auto;
   padding: 3px 10px;
@@ -148,14 +222,9 @@ function onRetry() {
   cursor: pointer;
   transition: background 160ms ease, color 160ms ease;
 }
+
 .retry-btn:hover {
   background: #b91c1c;
   color: #fff;
-}
-
-.chart-body {
-  position: relative;
-  flex: 1 1 auto;
-  min-height: 0;
 }
 </style>

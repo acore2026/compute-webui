@@ -83,12 +83,60 @@ export const DEFAULT_LEGEND: LegendConfig = { visible: false, items: [] }
 export const EMPTY_TOPOLOGY: Topology = { nodes: [], edges: [] }
 
 export const DEFAULT_STEP: SequenceStep = {
-  id: 'stage-1',
-  kicker: 'STAGE 1',
-  title: 'DEFAULT',
-  phase: '默认阶段',
+  id: 'stage-base',
+  kicker: 'BASE',
+  title: 'INIT',
+  phase: 'Shared base layout',
   nodes: [],
   edges: []
+}
+
+export function cloneJson<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value))
+}
+
+function compactRecord<T extends Record<string, unknown> | undefined>(value: T) {
+  if (!value) return undefined
+  const entries = Object.entries(value).filter(([, item]) => item && Object.keys(item as object).length > 0)
+  return entries.length ? Object.fromEntries(entries) as T : undefined
+}
+
+function sanitizeStep(step: SequenceStep, index: number): SequenceStep {
+  return {
+    id: typeof step.id === 'string' && step.id ? step.id : `step-${index + 1}`,
+    kicker: typeof step.kicker === 'string' && step.kicker ? step.kicker : `STAGE ${index + 1}`,
+    title: typeof step.title === 'string' && step.title ? step.title : `STEP ${index + 1}`,
+    phase: typeof step.phase === 'string' ? step.phase : '',
+    nodes: Array.isArray(step.nodes) ? [...step.nodes] : [],
+    edges: Array.isArray(step.edges) ? [...step.edges] : [],
+    nodeSettings: compactRecord(step.nodeSettings),
+    edgeSettings: compactRecord(step.edgeSettings)
+  }
+}
+
+function isBaseLikeStep(step: SequenceStep | undefined) {
+  if (!step) return false
+  const title = step.title.trim().toUpperCase()
+  return !title || title === 'INIT' || title === 'DEFAULT' || title === 'BASE' || step.id === DEFAULT_STEP.id
+}
+
+function toBaseStep(step: SequenceStep | undefined): SequenceStep {
+  if (!step) return { ...DEFAULT_STEP }
+  return {
+    ...step,
+    id: DEFAULT_STEP.id,
+    kicker: typeof step.kicker === 'string' && step.kicker ? step.kicker : DEFAULT_STEP.kicker,
+    title: typeof step.title === 'string' && step.title ? step.title : DEFAULT_STEP.title,
+    phase: typeof step.phase === 'string' ? step.phase : DEFAULT_STEP.phase
+  }
+}
+
+export function normalizeSequenceSteps(steps: SequenceStep[] | undefined | null): SequenceStep[] {
+  const sanitized = Array.isArray(steps) ? steps.map(sanitizeStep) : []
+  const hasBaseStage = isBaseLikeStep(sanitized[0])
+  const baseStep = hasBaseStage ? toBaseStep(sanitized[0]) : { ...DEFAULT_STEP }
+  const animationSteps = hasBaseStage ? sanitized.slice(1) : sanitized
+  return [baseStep, ...animationSteps]
 }
 
 /* ============================================================
@@ -139,7 +187,7 @@ export async function loadAll(view: ViewId = DEFAULT_VIEW): Promise<{
 }> {
   const remote = await fetchRemoteState(view)
   const topology  = remote?.topology  ?? { nodes: [], edges: [] }
-  const sequence  = remote?.sequence?.length ? remote.sequence : [{ ...DEFAULT_STEP }]
+  const sequence  = normalizeSequenceSteps(remote?.sequence)
   const legendCfg = remote?.legend    ?? { ...DEFAULT_LEGEND }
   const captionTop = typeof remote?.captionTop === 'number' ? remote.captionTop : 40
   const captionVisible = remote?.captionVisible ?? true
@@ -148,5 +196,8 @@ export async function loadAll(view: ViewId = DEFAULT_VIEW): Promise<{
 }
 
 export async function saveAll(state: RemoteState, view: ViewId = DEFAULT_VIEW) {
-  await pushRemoteState(state, view)
+  await pushRemoteState({
+    ...state,
+    sequence: normalizeSequenceSteps(state.sequence)
+  }, view)
 }

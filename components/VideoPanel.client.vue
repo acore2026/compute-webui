@@ -50,7 +50,7 @@
         <span class="glass-bar-text glass-bar-text-wrap">{{ arMessage }}</span>
       </div>
 
-      <!-- 对话条 · 视频下方的固定长条，左贴边、右侧给手势留位（与手势独立） -->
+<!-- 对话条 · 视频下方的固定长条，左贴边、右侧给手势留位（与手势独立） -->
       <div v-if="arWhisper" class="glass-bar glass-bar-whisper">
         <span class="glass-bar-text glass-bar-text-wrap">“{{ arWhisper }}”</span>
       </div>
@@ -179,6 +179,7 @@ onBeforeUnmount(() => {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 
 .glass-bar-gesture {
   bottom: 16px;

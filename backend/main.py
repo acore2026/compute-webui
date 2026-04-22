@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import random
 from datetime import datetime
 from pathlib import Path
 
@@ -54,23 +53,64 @@ def metrics_history(time_window: int = 300) -> dict:
     now_ts = int(datetime.now().timestamp())
     start_ts = now_ts - window + 1
 
+    is_stage4 = _current_ar == "MEDIA_ESTABLISHED"
+
+    def clamp(value: float, lower: float, upper: float) -> float:
+        return max(lower, min(upper, value))
+
+    def build_average(rows: list[dict]) -> dict | None:
+        if not rows:
+            return None
+        return {
+            "e2e_latency_ms": round(sum(item["e2e_latency_ms"] for item in rows) / len(rows), 2),
+            "fps": round(sum(item["fps"] for item in rows) / len(rows), 2),
+        }
+
     samples = []
-    for ts in range(start_ts, now_ts + 1):
-        compute = round(3.5 + random.random() * 3.0, 2)
-        processing = round(3.0 + random.random() * 2.5, 2)
-        jitter = round(0.5 + random.random() * 2.5, 2)
-        e2e = round(compute + processing + jitter + random.random() * 1.5, 2)
-        fps = 30 if random.random() > 0.08 else 30 - random.randint(1, 4)
-        samples.append({
-            "timestamp":             ts,
-            "e2e_latency_ms":        e2e,
-            "jitter_ms":             jitter,
-            "compute_latency_ms":    compute,
-            "processing_latency_ms": processing,
-            "fps":                   fps,
+    ott_samples = []
+    for index, ts in enumerate(range(start_ts, now_ts + 1)):
+        progress = index / max(window - 1, 1)
+        wave = ((index * 7) % 9) - 4
+        ripple = ((index * 5) % 7) - 3
+
+        if is_stage4:
+            transition = 0.52
+            if progress < transition:
+                e2e = 11.5 + progress * 8.0 + wave * 0.55
+                fps = 29.5 - abs(ripple) * 0.18
+            else:
+                late = (progress - transition) / max(1 - transition, 1e-6)
+                e2e = 38.0 + late * 22.0 + wave * 1.2
+                fps = 25.0 - late * 3.0 - abs(ripple) * 0.35
+        else:
+            e2e = 12.5 + progress * 4.0 + wave * 0.5
+            fps = 29.6 - abs(ripple) * 0.16
+
+        core_sample = {
+            "timestamp":      ts,
+            "e2e_latency_ms": round(clamp(e2e, 8.5, 72.0), 2),
+            "fps":            round(clamp(fps, 18.0, 30.0), 2),
+        }
+        samples.append(core_sample)
+
+        if not is_stage4:
+            continue
+
+        ott_e2e = core_sample["e2e_latency_ms"] + 12.0 + progress * 8.0 + abs(wave) * 0.8
+        ott_fps = core_sample["fps"] - 1.2 - abs(ripple) * 0.18
+        ott_samples.append({
+            "timestamp":      ts,
+            "e2e_latency_ms": round(clamp(ott_e2e, 18.0, 88.0), 2),
+            "fps":            round(clamp(ott_fps, 16.0, 30.0), 2),
         })
 
-    return {"status": "SUCCESS", "metrics": samples}
+    return {
+        "status": "SUCCESS",
+        "metrics": samples,
+        "ott_metrics": ott_samples if is_stage4 else [],
+        "average": build_average(samples),
+        "ott_average": build_average(ott_samples) if is_stage4 else None,
+    }
 
 
 # ============================================================

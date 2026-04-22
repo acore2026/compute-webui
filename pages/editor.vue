@@ -308,12 +308,14 @@
         <SequenceBuilder
           :steps="sequence"
           :node-ids="missionNodeIds"
+          :regions="regionNodes"
           :edge-ids="edgeIds"
           :playing-idx="playingIdx"
           :preview-idx="previewIdx"
           :collapsed="seqCollapsed"
           class="min-h-0"
-          @update:steps="sequence = $event"
+          @update:steps="setSequence($event)"
+          @toggle-region-visibility="setRegionVisibility"
           @play="playSequence"
           @toggle="seqCollapsed = !seqCollapsed"
           @preview="previewStep"
@@ -369,7 +371,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, markRaw, nextTick, onMounted, ref } from 'vue'
+import { computed, markRaw, nextTick, onMounted, ref, watch } from 'vue'
 import { VueFlow, ConnectionMode, type Node, type Edge, type Connection } from '@vue-flow/core'
 import { Background } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
@@ -401,7 +403,7 @@ import SequenceBuilder from '~/components/editor/SequenceBuilder.vue'
 import { kindMeta, type NodeKind } from '~/components/flow/kindMeta'
 import {
   loadAll, saveAll, fetchRemoteState,
-  DEFAULT_LEGEND, DEFAULT_VIEW, VIEW_IDS,
+  DEFAULT_LEGEND, DEFAULT_VIEW, VIEW_IDS, normalizeSequenceSteps as normalizeStoredSequenceSteps,
   type SequenceStep, type LegendConfig, type ViewId
 } from '~/components/flow/storage'
 
@@ -433,6 +435,8 @@ const nodeTypes = {
 }
 const edgeTypes = { mission: markRaw(MissionEdge) }
 
+const baseNodes = ref<Node[]>([])
+const baseEdges = ref<Edge[]>([])
 const nodes = ref<Node[]>([])
 const edges = ref<Edge[]>([])
 const sequence = ref<SequenceStep[]>([])
@@ -447,31 +451,82 @@ const captionVisible = ref(true)
 const selectedIds = ref<string[]>([])
 const singleSelection = ref<Selection | null>(null)
 
-const missionNodeIds = computed(() => nodes.value.filter(n => n.type === 'mission').map(n => n.id))
-const edgeIds = computed(() => edges.value.map(e => e.id))
+const missionNodeIds = computed(() => baseNodes.value.filter(n => n.type === 'mission').map(n => n.id))
+const regionNodes = computed(() =>
+  baseNodes.value
+    .filter(n => n.type === 'region')
+    .map(n => ({
+      id: n.id,
+      label: String((n.data as any)?.label || n.id),
+      hidden: !!n.hidden
+    }))
+)
+const edgeIds = computed(() => baseEdges.value.map(e => e.id))
 
-/** 确保至少存在一个默认 stage */
-function ensureDefaultStage() {
-  if (sequence.value.length === 0) {
-    sequence.value = [{
-      id: `step-${Date.now()}`,
-      kicker: 'STAGE 1',
-      title: '默认阶段',
-      phase: '',
-      nodes: [],
-      edges: []
-    }]
+function cloneJson<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value))
+}
+
+function restoreBaseCanvas() {
+  nodes.value = cloneJson(baseNodes.value)
+  edges.value = cloneJson(baseEdges.value)
+}
+
+function syncCanvasWithCurrentStep() {
+  if (previewIdx.value !== null && sequence.value[previewIdx.value]) {
+    applyStep(sequence.value[previewIdx.value], previewIdx.value)
+    return
   }
+  restoreBaseCanvas()
+}
+
+function loadStateIntoEditor(all: Awaited<ReturnType<typeof loadAll>>) {
+  baseNodes.value = cloneJson(all.topology.nodes)
+  baseEdges.value = cloneJson(all.topology.edges)
+  restoreBaseCanvas()
+  sequence.value = normalizeStoredSequenceSteps(all.sequence)
+  legend.value = all.legend
+  captionVisible.value = all.captionVisible
+}
+
+function setSequence(nextSteps: SequenceStep[]) {
+  const normalized = normalizeStoredSequenceSteps(nextSteps)
+  sequence.value = normalized
+
+  const nextPreviewIdx = previewIdx.value === null
+    ? 0
+    : Math.min(Math.max(previewIdx.value, 0), normalized.length - 1)
+
+  previewIdx.value = nextPreviewIdx
+  applyStep(normalized[nextPreviewIdx], nextPreviewIdx)
+  refreshSelectionFromCanvas()
+}
+
+function setRegionVisibility(stepIdx: number, id: string, visible: boolean) {
+  const hidden = !visible
+  const step = sequence.value[stepIdx]
+  if (!step) return
+  const baseHidden = !!baseNodes.value.find(n => n.id === id)?.hidden
+  const currentOverride = step.nodeSettings?.[id] ? { ...step.nodeSettings[id] } : {}
+
+  if (hidden === baseHidden) delete (currentOverride as Record<string, any>).hidden
+  else (currentOverride as Record<string, any>).hidden = hidden
+
+  const nextNodeSettings = { ...(step.nodeSettings || {}) }
+  if (Object.keys(currentOverride).length > 0) nextNodeSettings[id] = currentOverride
+  else delete nextNodeSettings[id]
+
+  const nextSteps = sequence.value.slice()
+  nextSteps[stepIdx] = {
+    ...step,
+    nodeSettings: Object.keys(nextNodeSettings).length ? nextNodeSettings : undefined
+  }
+  setSequence(nextSteps)
 }
 
 onMounted(async () => {
   const all = await loadAll(activeView.value)
-  nodes.value = all.topology.nodes
-  edges.value = all.topology.edges
-  sequence.value = all.sequence
-  legend.value = all.legend
-  captionVisible.value = all.captionVisible
-  ensureDefaultStage()
+  loadStateIntoEditor(all)
   // 自动预览第一个 stage，让画布立刻展示该 stage
   nextTick(() => previewStep(0))
 })
@@ -481,16 +536,33 @@ watch(activeView, async (v) => {
   previewIdx.value = null
   restoreSnapshot()
   const all = await loadAll(v)
-  nodes.value = all.topology.nodes
-  edges.value = all.topology.edges
-  sequence.value = all.sequence
-  legend.value = all.legend
-  captionVisible.value = all.captionVisible
+  loadStateIntoEditor(all)
   selectedIds.value = []
   singleSelection.value = null
-  ensureDefaultStage()
   nextTick(() => previewStep(0))
 })
+
+watch(nodes, (nextNodes) => {
+  const layoutById = new Map(nextNodes.map(node => [
+    node.id,
+    {
+      position: cloneJson(node.position),
+      style: cloneJson(node.style ?? {}),
+      zIndex: node.zIndex
+    }
+  ]))
+
+  baseNodes.value = baseNodes.value.map(node => {
+    const layout = layoutById.get(node.id)
+    if (!layout) return node
+    return {
+      ...node,
+      position: layout.position,
+      style: layout.style,
+      zIndex: layout.zIndex
+    }
+  })
+}, { deep: true, flush: 'sync' })
 
 // ----- 选择 -----
 function onNodeClick(e: { event: MouseEvent; node: Node }) {
@@ -525,17 +597,15 @@ function clearSelection() {
 // ----- 连线 -----
 function onConnect(conn: Connection) {
   const id = `e-${conn.source}-${conn.target}-${Date.now().toString(36)}`
-  edges.value = [
-    ...edges.value,
-    {
-      id, source: conn.source!, target: conn.target!,
-      sourceHandle: conn.sourceHandle || undefined,
-      targetHandle: conn.targetHandle || undefined,
-      type: 'mission',
-      data: { kind: 'baseline', state: 'idle', pathType: 'bezier' }
-    }
-  ]
-  invalidateSnapshot()
+  const edge: Edge = {
+    id, source: conn.source!, target: conn.target!,
+    sourceHandle: conn.sourceHandle || undefined,
+    targetHandle: conn.targetHandle || undefined,
+    type: 'mission',
+    data: { kind: 'baseline', state: 'idle', pathType: 'bezier' }
+  }
+  baseEdges.value = [...baseEdges.value, cloneJson(edge)]
+  syncCanvasWithCurrentStep()
 }
 
 // ----- 添加节点 -----
@@ -550,75 +620,67 @@ function addMission(kind: NodeKind) {
   const id = uniqueId(kind)
   const baseX = 160 + (nodes.value.filter(n => n.type === 'mission').length % 5) * 180
   const baseY = 120 + Math.floor(nodes.value.filter(n => n.type === 'mission').length / 5) * 120
-  nodes.value = [
-    ...nodes.value,
-    {
-      id, type: 'mission',
-      position: { x: snapTo(baseX), y: snapTo(baseY) },
-      style: { width: '140px' },
-      zIndex: 10,
-      data: {
-        label: kindMeta[kind].label || kind.toUpperCase(),
-        role: '',
-        kind,
-        handles: [
-          // 四边中点
-          'in-top', 'out-top', 'in-bottom', 'out-bottom',
-          'in-left', 'out-left', 'in-right', 'out-right',
-          // 四边 1/4 与 3/4 (in/out 各一)
-          'in-top-25',    'out-top-25',    'in-top-75',    'out-top-75',
-          'in-bottom-25', 'out-bottom-25', 'in-bottom-75', 'out-bottom-75',
-          'in-left-25',   'out-left-25',   'in-left-75',   'out-left-75',
-          'in-right-25',  'out-right-25',  'in-right-75',  'out-right-75'
-        ]
-      }
+  const node: Node = {
+    id, type: 'mission',
+    position: { x: snapTo(baseX), y: snapTo(baseY) },
+    style: { width: '140px' },
+    zIndex: 10,
+    data: {
+      label: kindMeta[kind].label || kind.toUpperCase(),
+      role: '',
+      kind,
+      handles: [
+        // 四边中点
+        'in-top', 'out-top', 'in-bottom', 'out-bottom',
+        'in-left', 'out-left', 'in-right', 'out-right',
+        // 四边 1/4 与 3/4 (in/out 各一)
+        'in-top-25',    'out-top-25',    'in-top-75',    'out-top-75',
+        'in-bottom-25', 'out-bottom-25', 'in-bottom-75', 'out-bottom-75',
+        'in-left-25',   'out-left-25',   'in-left-75',   'out-left-75',
+        'in-right-25',  'out-right-25',  'in-right-75',  'out-right-75'
+      ]
     }
-  ]
-  invalidateSnapshot()
+  }
+  baseNodes.value = [...baseNodes.value, cloneJson(node)]
+  syncCanvasWithCurrentStep()
 }
 function addRegion(variant: 'default' | 'external' | 'mno' | 'access') {
   const id = uniqueId(`region-${variant}`)
-  nodes.value = [
-    ...nodes.value,
-    {
-      id, type: 'region',
-      position: { x: snapTo(60), y: snapTo(60) },
-      style: { width: '420px', height: '240px' },
-      zIndex: 0,
-      data: { label: `REGION · ${variant.toUpperCase()}`, variant }
-    }
-  ]
-  invalidateSnapshot()
+  const node: Node = {
+    id, type: 'region',
+    position: { x: snapTo(60), y: snapTo(60) },
+    style: { width: '420px', height: '240px' },
+    zIndex: 0,
+    data: { label: `REGION · ${variant.toUpperCase()}`, variant }
+  }
+  baseNodes.value = [...baseNodes.value, cloneJson(node)]
+  syncCanvasWithCurrentStep()
 }
 function addBus() {
   const id = uniqueId('bus')
-  nodes.value = [
-    ...nodes.value,
-    {
-      id, type: 'bus',
-      position: { x: snapTo(200), y: snapTo(220) },
-      style: { width: '440px', height: '24px' },
-      zIndex: 2,
-      data: { label: 'AGENT BUS' }
-    }
-  ]
-  invalidateSnapshot()
+  const node: Node = {
+    id, type: 'bus',
+    position: { x: snapTo(200), y: snapTo(220) },
+    style: { width: '440px', height: '24px' },
+    zIndex: 2,
+    data: { label: 'AGENT BUS' }
+  }
+  baseNodes.value = [...baseNodes.value, cloneJson(node)]
+  syncCanvasWithCurrentStep()
 }
 function addBar() {
   const id = uniqueId('bar')
   const baseX = 160 + (nodes.value.filter(n => n.type === 'mission' || n.type === 'bar').length % 5) * 180
   const baseY = 120 + Math.floor(nodes.value.filter(n => n.type === 'mission' || n.type === 'bar').length / 5) * 120
-  nodes.value = [
-    ...nodes.value,
-    {
-      id, type: 'bar',
-      position: { x: snapTo(baseX), y: snapTo(baseY) },
-      style: { width: '140px', height: '28px' },
-      zIndex: 10,
-      data: { color: '#64748b', height: 8 }
-    }
-  ]
-  invalidateSnapshot()
+  const node: Node = {
+    id, type: 'bar',
+    position: { x: snapTo(baseX), y: snapTo(baseY) },
+    style: { width: '140px', height: '28px' },
+    zIndex: 10,
+    data: { color: '#64748b', height: 8 }
+  }
+  baseNodes.value = [...baseNodes.value, cloneJson(node)]
+  syncCanvasWithCurrentStep()
 }
 
 function addImage() {
@@ -626,24 +688,22 @@ function addImage() {
   const count = nodes.value.filter(n => n.type === 'image').length
   const baseX = 160 + (count % 5) * 180
   const baseY = 120 + Math.floor(count / 5) * 120
-  nodes.value = [
-    ...nodes.value,
-    {
-      id, type: 'image',
-      position: { x: snapTo(baseX), y: snapTo(baseY) },
-      style: { width: '100px' },
-      zIndex: 10,
-      data: {
-        label: '机器狗',
-        src: '',
-        handles: [
-          'in-top', 'out-top', 'in-bottom', 'out-bottom',
-          'in-left', 'out-left', 'in-right', 'out-right'
-        ]
-      }
+  const node: Node = {
+    id, type: 'image',
+    position: { x: snapTo(baseX), y: snapTo(baseY) },
+    style: { width: '100px' },
+    zIndex: 10,
+    data: {
+      label: '机器狗',
+      src: '',
+      handles: [
+        'in-top', 'out-top', 'in-bottom', 'out-bottom',
+        'in-left', 'out-left', 'in-right', 'out-right'
+      ]
     }
-  ]
-  invalidateSnapshot()
+  }
+  baseNodes.value = [...baseNodes.value, cloneJson(node)]
+  syncCanvasWithCurrentStep()
 }
 
 // ----- Patch -----
@@ -653,6 +713,9 @@ function patchNodeStyle(id: string, style: Record<string, any>) {
     Object.keys(style).forEach(k => { if (style[k] === undefined) delete m[k] })
     return m
   }
+  baseNodes.value = baseNodes.value.map(n =>
+    n.id === id ? { ...n, style: merge(n.style) } : n
+  )
   nodes.value = nodes.value.map(n => {
     if (n.id !== id) return n
     const next = { ...n, style: merge(n.style) }
@@ -661,16 +724,11 @@ function patchNodeStyle(id: string, style: Record<string, any>) {
     }
     return next
   })
-  if (baseSnapshot) {
-    baseSnapshot.nodes = baseSnapshot.nodes.map(n =>
-      n.id === id ? { ...n, style: merge(n.style) } : n
-    )
-  }
 }
 
 function patchNode(id: string, key: string, value: any) {
   // 预览中修改任何非结构性字段 → 写入当前 step 的 nodeSettings
-  if (previewIdx.value !== null && !NODE_BASE_ONLY.has(key)) {
+  if (previewIdx.value !== null && NODE_STAGE_KEYS.has(key)) {
     const stepIdx = previewIdx.value
     const step = sequence.value[stepIdx]
     if (step) {
@@ -690,6 +748,24 @@ function patchNode(id: string, key: string, value: any) {
     }
   }
 
+  if (key === 'hidden') {
+    baseNodes.value = baseNodes.value.map(n =>
+      n.id === id ? { ...n, hidden: !!value } : n
+    )
+    nodes.value = nodes.value.map(n => {
+      if (n.id !== id) return n
+      const next = { ...n, hidden: !!value }
+      if (singleSelection.value?.type === 'node' && singleSelection.value.node?.id === id) {
+        singleSelection.value = { type: 'node', node: next }
+      }
+      return next
+    })
+    return
+  }
+
+  baseNodes.value = baseNodes.value.map(n =>
+    n.id === id ? { ...n, data: { ...(n.data || {}), [key]: value } } : n
+  )
   nodes.value = nodes.value.map(n => {
     if (n.id !== id) return n
     const next = { ...n, data: { ...n.data, [key]: value } }
@@ -698,17 +774,16 @@ function patchNode(id: string, key: string, value: any) {
     }
     return next
   })
-  if (baseSnapshot) {
-    baseSnapshot.nodes = baseSnapshot.nodes.map(n =>
-      n.id === id ? { ...n, data: { ...(n.data || {}), [key]: value } } : n
-    )
-  }
 }
 // 预览某 stage 时，对 node/edge 的 data 做的任何改动全部进入 step override，
 // 该 stage 之外的画面一概不受影响。结构性字段（id / source / target / type）
 // 本就不从 patchEdge / patchNode 流过，无需再单独例外。
-const EDGE_BASE_ONLY: Set<string> = new Set()
-const NODE_BASE_ONLY: Set<string> = new Set()
+const EDGE_STAGE_KEYS = new Set([
+  'state', 'direction', 'glow', 'lineColor', 'lineWidth', 'lineOpacity', 'pathType', 'note'
+])
+const NODE_STAGE_KEYS = new Set([
+  'active', 'flashActive', 'message', 'messageIcon', 'messageState', 'plan', 'hidden'
+])
 
 // 纯"动画态"字段 —— 每个 stage 完全独立；base 上的取值不允许 leak 到 stage。
 // applyStep 会从 baseData 中剥掉这些 key，再把 step override 叠加上去。
@@ -727,7 +802,7 @@ function stripKeys<T extends Record<string, any>>(obj: T, keys: Set<string>): T 
 
 function patchEdge(id: string, key: string, value: any) {
   // 预览中修改任何字段 → 写入 step.edgeSettings，这个 stage 独立拥有
-  if (previewIdx.value !== null && !EDGE_BASE_ONLY.has(key)) {
+  if (previewIdx.value !== null && EDGE_STAGE_KEYS.has(key)) {
     const stepIdx = previewIdx.value
     const step = sequence.value[stepIdx]
     if (step) {
@@ -748,6 +823,9 @@ function patchEdge(id: string, key: string, value: any) {
   }
 
   // 否则：更新 base
+  baseEdges.value = baseEdges.value.map(e =>
+    e.id === id ? { ...e, data: { ...((e.data as any) || {}), [key]: value } } : e
+  )
   edges.value = edges.value.map(e => {
     if (e.id !== id) return e
     const next = { ...e, data: { ...(e.data as any || {}), [key]: value } }
@@ -756,21 +834,45 @@ function patchEdge(id: string, key: string, value: any) {
     }
     return next
   })
-  if (baseSnapshot) {
-    baseSnapshot.edges = baseSnapshot.edges.map(e =>
-      e.id === id ? { ...e, data: { ...((e.data as any) || {}), [key]: value } } : e
-    )
-  }
 }
 function deleteNode(id: string) {
-  nodes.value = nodes.value.filter(n => n.id !== id)
-  edges.value = edges.value.filter(e => e.source !== id && e.target !== id)
-  invalidateSnapshot()
+  const removedEdgeIds = new Set(
+    baseEdges.value
+      .filter(e => e.source === id || e.target === id)
+      .map(e => e.id)
+  )
+  baseNodes.value = baseNodes.value.filter(n => n.id !== id)
+  baseEdges.value = baseEdges.value.filter(e => e.source !== id && e.target !== id)
+  sequence.value = sequence.value.map(step => {
+    const nextNodeSettings = step.nodeSettings ? { ...step.nodeSettings } : undefined
+    const nextEdgeSettings = step.edgeSettings ? { ...step.edgeSettings } : undefined
+    if (nextNodeSettings) delete nextNodeSettings[id]
+    if (nextEdgeSettings) {
+      for (const edgeId of removedEdgeIds) delete nextEdgeSettings[edgeId]
+    }
+    return {
+      ...step,
+      nodes: step.nodes.filter(nodeId => nodeId !== id),
+      edges: step.edges.filter(edgeId => !removedEdgeIds.has(edgeId)),
+      nodeSettings: nextNodeSettings && Object.keys(nextNodeSettings).length ? nextNodeSettings : undefined,
+      edgeSettings: nextEdgeSettings && Object.keys(nextEdgeSettings).length ? nextEdgeSettings : undefined
+    }
+  })
+  syncCanvasWithCurrentStep()
   clearSelection()
 }
 function deleteEdge(id: string) {
-  edges.value = edges.value.filter(e => e.id !== id)
-  invalidateSnapshot()
+  baseEdges.value = baseEdges.value.filter(e => e.id !== id)
+  sequence.value = sequence.value.map(step => {
+    const nextEdgeSettings = step.edgeSettings ? { ...step.edgeSettings } : undefined
+    if (nextEdgeSettings) delete nextEdgeSettings[id]
+    return {
+      ...step,
+      edges: step.edges.filter(edgeId => edgeId !== id),
+      edgeSettings: nextEdgeSettings && Object.keys(nextEdgeSettings).length ? nextEdgeSettings : undefined
+    }
+  })
+  syncCanvasWithCurrentStep()
   clearSelection()
 }
 
@@ -785,16 +887,30 @@ function renameNode(oldId: string, newId: string) {
     }
     return
   }
+  baseNodes.value = baseNodes.value.map(n => n.id === oldId ? { ...n, id: newId } : n)
+  baseEdges.value = baseEdges.value.map(e => ({
+    ...e,
+    source: e.source === oldId ? newId : e.source,
+    target: e.target === oldId ? newId : e.target
+  }))
   nodes.value = nodes.value.map(n => n.id === oldId ? { ...n, id: newId } : n)
   edges.value = edges.value.map(e => ({
     ...e,
     source: e.source === oldId ? newId : e.source,
     target: e.target === oldId ? newId : e.target
   }))
-  sequence.value = sequence.value.map(s => ({
-    ...s,
-    nodes: s.nodes.map(i => i === oldId ? newId : i)
-  }))
+  sequence.value = sequence.value.map(s => {
+    const nextNodeSettings = s.nodeSettings ? { ...s.nodeSettings } : undefined
+    if (nextNodeSettings?.[oldId]) {
+      nextNodeSettings[newId] = nextNodeSettings[oldId]
+      delete nextNodeSettings[oldId]
+    }
+    return {
+      ...s,
+      nodes: s.nodes.map(i => i === oldId ? newId : i),
+      nodeSettings: nextNodeSettings
+    }
+  })
   selectedIds.value = selectedIds.value.map(i => i === oldId ? newId : i)
   if (singleSelection.value?.type === 'node' && singleSelection.value.node?.id === oldId) {
     const updated = nodes.value.find(n => n.id === newId)
@@ -812,11 +928,20 @@ function renameEdge(oldId: string, newId: string) {
     }
     return
   }
+  baseEdges.value = baseEdges.value.map(e => e.id === oldId ? { ...e, id: newId } : e)
   edges.value = edges.value.map(e => e.id === oldId ? { ...e, id: newId } : e)
-  sequence.value = sequence.value.map(s => ({
-    ...s,
-    edges: s.edges.map(i => i === oldId ? newId : i)
-  }))
+  sequence.value = sequence.value.map(s => {
+    const nextEdgeSettings = s.edgeSettings ? { ...s.edgeSettings } : undefined
+    if (nextEdgeSettings?.[oldId]) {
+      nextEdgeSettings[newId] = nextEdgeSettings[oldId]
+      delete nextEdgeSettings[oldId]
+    }
+    return {
+      ...s,
+      edges: s.edges.map(i => i === oldId ? newId : i),
+      edgeSettings: nextEdgeSettings
+    }
+  })
   if (singleSelection.value?.type === 'edge' && singleSelection.value.edge?.id === oldId) {
     const updated = edges.value.find(e => e.id === newId)
     if (updated) singleSelection.value = { type: 'edge', edge: updated }
@@ -888,9 +1013,11 @@ function snapSelectedToGrid() {
 
 function mutate(targets: Node[], mapPos: (n: Node) => { x: number; y: number }) {
   const ids = new Set(targets.map(n => n.id))
+  baseNodes.value = baseNodes.value.map(n => ids.has(n.id) ? { ...n, position: mapPos(n) } : n)
   nodes.value = nodes.value.map(n => ids.has(n.id) ? { ...n, position: mapPos(n) } : n)
 }
 function updatePos(id: string, pos: { x: number; y: number }) {
+  baseNodes.value = baseNodes.value.map(n => n.id === id ? { ...n, position: pos } : n)
   nodes.value = nodes.value.map(n => n.id === id ? { ...n, position: pos } : n)
 }
 
@@ -898,7 +1025,10 @@ function updatePos(id: string, pos: { x: number; y: number }) {
 async function clearCanvas() {
   if (nodes.value.length === 0 && edges.value.length === 0) return
   if (!confirm('确认清空所有节点和连线？（立即生效并持久化）')) return
-  nodes.value = []; edges.value = []; clearSelection()
+  baseNodes.value = []
+  baseEdges.value = []
+  setSequence([])
+  clearSelection()
   const view = activeView.value
   const prev = await fetchRemoteState(view)
   await saveAll({
@@ -914,9 +1044,10 @@ async function clearCanvas() {
 async function save() {
   // 如果正在预览某个 stage，edges.value / nodes.value 已经被 step override 染色了，
   // 不能直接当 base 存下去——否则"stage 的改动会渗进 base、污染其他 stage"。
-  // 优先从 baseSnapshot 取最干净那份；没有快照说明没在预览中，此时 value 本身就是 base。
-  const sourceNodes = baseSnapshot?.nodes ?? nodes.value
-  const sourceEdges = baseSnapshot?.edges ?? edges.value
+  // 共享布局始终以 base topology 为准。
+  const sourceNodes = baseNodes.value
+  const sourceEdges = baseEdges.value
+  sequence.value = normalizeStoredSequenceSteps(sequence.value)
 
   const cleanNodes = sourceNodes.map(n => {
     if (n.type !== 'mission') return { ...n, data: { ...((n.data || {}) as any) } }
@@ -925,7 +1056,7 @@ async function save() {
   })
   const cleanEdges = sourceEdges.map(e => ({
     ...e,
-    data: { ...((e.data as any) || {}) }
+    data: stripKeys(((e.data as any) || {}) as Record<string, any>, EDGE_ANIM_ONLY)
   }))
   // 保留用户在主页拖拽后的 captionTop
   const view = activeView.value
@@ -951,9 +1082,9 @@ function openIo(mode: 'import' | 'export') {
   ioError.value = ''
   if (mode === 'export') {
     const payload = {
-      nodes: nodes.value,
-      edges: edges.value,
-      sequence: sequence.value,
+      nodes: baseNodes.value,
+      edges: baseEdges.value,
+      sequence: normalizeStoredSequenceSteps(sequence.value),
       legend: legend.value
     }
     ioText.value = JSON.stringify(payload, null, 2)
@@ -985,11 +1116,10 @@ function applyImport() {
     ioError.value = 'nodes 和 edges 必须是数组'; return
   }
   // 应用
-  nodes.value  = parsed.nodes
-  edges.value  = parsed.edges
-  sequence.value = Array.isArray(parsed.sequence) ? parsed.sequence : []
+  baseNodes.value = cloneJson(parsed.nodes)
+  baseEdges.value = cloneJson(parsed.edges)
+  setSequence(Array.isArray(parsed.sequence) ? parsed.sequence : [])
   if (parsed.legend && typeof parsed.legend === 'object') legend.value = parsed.legend
-  invalidateSnapshot()
   clearSelection()
   ioMode.value = null
   ElMessage?.success?.(`已导入：${parsed.nodes.length} 节点 / ${parsed.edges.length} 连线`)
@@ -1017,36 +1147,39 @@ function playSequence() {
   }, (sequence.value.length + 2) * 1200))
 }
 // 在进入预览/播放前抓取基线快照；退出时还原
-let baseSnapshot: { nodes: Node[]; edges: Edge[] } | null = null
 function takeSnapshot() {
-  baseSnapshot = {
-    nodes: JSON.parse(JSON.stringify(nodes.value)),
-    edges: JSON.parse(JSON.stringify(edges.value))
-  }
+  // shared base topology is tracked continuously via baseNodes/baseEdges
 }
 function restoreSnapshot() {
-  if (!baseSnapshot) return
-  nodes.value = baseSnapshot.nodes
-  edges.value = baseSnapshot.edges
-  baseSnapshot = null
+  restoreBaseCanvas()
 }
 /** 编辑器修改节点/边后，snapshot 失效，下次 applyStep 时重新采集，
  *  保证基线是最新的 Inspector 编辑结果 */
 function invalidateSnapshot() {
-  baseSnapshot = null
+  syncCanvasWithCurrentStep()
 }
 
 function applyStep(step: SequenceStep, idx: number) {
-  if (!baseSnapshot) takeSnapshot()
   playingIdx.value = idx
-  const base = baseSnapshot!
+  const base = {
+    nodes: baseNodes.value,
+    edges: baseEdges.value
+  }
   const nodeS = step.nodeSettings || {}
   nodes.value = base.nodes.map(n => {
-    if (n.type !== 'mission') return { ...n, data: { ...(n.data || {}) } }
-    const active = step.nodes.includes(n.id)
     const baseData = (n.data || {}) as any
     const baseVisual = stripKeys(baseData, NODE_ANIM_ONLY)
     const ov = (nodeS[n.id] || {}) as Record<string, any>
+    const stageHidden = typeof ov.hidden === 'boolean' ? ov.hidden : n.hidden
+    if (n.type !== 'mission') {
+      const { hidden: _hidden, ...dataOverride } = ov
+      return {
+        ...n,
+        hidden: stageHidden,
+        data: { ...baseVisual, ...dataOverride }
+      }
+    }
+    const active = step.nodes.includes(n.id)
     // 顺序：base 视觉 → stage override（含动画态）→ stage 的 active/flashActive 兜底
     const next: any = {
       ...baseVisual,
@@ -1055,7 +1188,7 @@ function applyStep(step: SequenceStep, idx: number) {
       flashActive: ov.flashActive ?? active
     }
     if ('plan' in ov && ov.plan === null) delete next.plan
-    return { ...n, data: next }
+    return { ...n, hidden: stageHidden, data: next }
   })
   const settings = step.edgeSettings || {}
   edges.value = base.edges.map(e => {

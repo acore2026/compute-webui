@@ -122,6 +122,8 @@ const nodeTypes = {
 }
 const edgeTypes = { mission: markRaw(MissionEdge) }
 
+const baseNodes = ref<Node[]>([])
+const baseEdges = ref<Edge[]>([])
 const nodes = ref<Node[]>([])
 const edges = ref<Edge[]>([])
 const sequence = ref<SequenceStep[]>([])
@@ -133,12 +135,22 @@ const viewTabs: { id: ViewId; label: string }[] = [
   { id: 'public-cloud', label: '公有云' },
   { id: 'core-network', label: '核心网' }
 ]
-const activeView = ref<ViewId>(DEFAULT_VIEW)
+const activeView = useTopologyView()
 const currentStage = ref('INIT')
+const sharedSystemStage = useSystemStage()
+
+function cloneJson<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value))
+}
+
+function restoreBaseCanvas() {
+  nodes.value = cloneJson(baseNodes.value)
+  edges.value = cloneJson(baseEdges.value)
+}
 
 async function hydrate(view: ViewId) {
   const all = await loadAll(view)
-  nodes.value = all.topology.nodes.map(n => {
+  const cleanNodes = all.topology.nodes.map(n => {
     if (n.type !== 'mission') return { ...n }
     const d = (n.data || {}) as any
     const cleaned: any = { ...d }
@@ -150,9 +162,12 @@ async function hydrate(view: ViewId) {
     delete cleaned.plan
     return { ...n, data: cleaned }
   })
-  edges.value = all.topology.edges.map(e => ({
+  const cleanEdges = all.topology.edges.map(e => ({
     ...e, data: { ...((e.data as any) || {}) }
   }))
+  baseNodes.value = cleanNodes
+  baseEdges.value = cleanEdges
+  restoreBaseCanvas()
   sequence.value = all.sequence
   legend.value = all.legend
   captionTop.value = all.captionTop
@@ -164,9 +179,9 @@ async function activateView(next: ViewId, syncTransportMode = false) {
     await syncTransportModeForTopologyView(next, { backendUrl, traceCall })
   }
   // 停掉演示、清除高亮、释放 baseSnap，避免跨视图污染
+  // 切视图前先停掉轮询和定时演示，避免跨视图残留状态
   timers.forEach(clearTimeout); timers = []
   stopStagePolling()
-  baseSnap = null
   activeView.value = next
   captionKey.value++
   await hydrate(next)
@@ -189,10 +204,11 @@ function saveCaptionTopDebounced() {
   const view = activeView.value
   saveCaptionTimer = setTimeout(() => {
     pushRemoteState({
-      topology: { nodes: nodes.value, edges: edges.value },
+      topology: { nodes: baseNodes.value, edges: baseEdges.value },
       sequence: sequence.value,
       legend:   legend.value,
-      captionTop: captionTop.value
+      captionTop: captionTop.value,
+      captionVisible: captionVisible.value
     }, view)
   }, 500)
 }
@@ -226,7 +242,7 @@ function setCaption(c: Partial<typeof caption.value>) {
 /** 回到"默认态"：先从后端拉当前 stage，匹配到就展示；否则展示第一个 */
 async function applyDefaultStage(): Promise<string> {
   if (sequence.value.length === 0) {
-    restore()
+    restoreBaseCanvas()
     return currentStage.value
   }
   // 尝试从后端获取当前 stage，优先展示后端状态
@@ -236,18 +252,17 @@ async function applyDefaultStage(): Promise<string> {
       $fetch<{ status: string; current_stage: string }>(url)
     )
     if (data?.status === 'SUCCESS') {
-      currentStage.value = data.current_stage
       lastStage = data.current_stage
+      currentStage.value = data.current_stage
+      sharedSystemStage.value = data.current_stage
       const step = findStepByStage(data.current_stage)
       if (step) {
-        if (!baseSnap) snapshot()
         applyStep(step)
         return data.current_stage
       }
     }
   } catch {}
   // fallback：展示第一个
-  if (!baseSnap) snapshot()
   applyStep(sequence.value[0])
   return currentStage.value
 }
@@ -272,19 +287,6 @@ function clearHighlight() {
 }
 
 let timers: ReturnType<typeof setTimeout>[] = []
-let baseSnap: { nodes: Node[]; edges: Edge[] } | null = null
-function snapshot() {
-  baseSnap = {
-    nodes: JSON.parse(JSON.stringify(nodes.value)),
-    edges: JSON.parse(JSON.stringify(edges.value))
-  }
-}
-function restore() {
-  if (!baseSnap) return
-  nodes.value = baseSnap.nodes
-  edges.value = baseSnap.edges
-  baseSnap = null
-}
 
 // 纯"动画态"字段：每个 stage 独立，base 上的取值不 leak 到 stage。
 const EDGE_ANIM_ONLY = new Set(['state', 'direction', 'glow'])
@@ -300,16 +302,26 @@ function stripKeys<T extends Record<string, any>>(obj: T, keys: Set<string>): T 
 }
 
 function applyStep(step: SequenceStep) {
-  if (!baseSnap) snapshot()
   setCaption({ kicker: step.kicker, title: step.title, phase: step.phase })
-  const base = baseSnap!
+  const base = {
+    nodes: baseNodes.value,
+    edges: baseEdges.value
+  }
   const nodeS = (step as any).nodeSettings || {}
   nodes.value = base.nodes.map(n => {
-    if (n.type !== 'mission') return { ...n, data: { ...(n.data || {}) } }
-    const isActive = step.nodes.includes(n.id)
     const baseData = (n.data || {}) as any
     const baseVisual = stripKeys(baseData, NODE_ANIM_ONLY)
     const ov = (nodeS[n.id] || {}) as Record<string, any>
+    const stageHidden = typeof ov.hidden === 'boolean' ? ov.hidden : n.hidden
+    if (n.type !== 'mission') {
+      const { hidden: _hidden, ...dataOverride } = ov
+      return {
+        ...n,
+        hidden: stageHidden,
+        data: { ...baseVisual, ...dataOverride }
+      }
+    }
+    const isActive = step.nodes.includes(n.id)
     const next: any = {
       ...baseVisual,
       ...ov,
@@ -317,7 +329,7 @@ function applyStep(step: SequenceStep) {
       flashActive: ov.flashActive ?? isActive
     }
     if ('plan' in ov && ov.plan === null) delete next.plan
-    return { ...n, data: next }
+    return { ...n, hidden: stageHidden, data: next }
   })
   const settings = step.edgeSettings || {}
   edges.value = base.edges.map(e => {
@@ -370,13 +382,13 @@ async function pollStage() {
     if (!data || data.status !== 'SUCCESS') return
     const stage = data.current_stage
     currentStage.value = stage
+    sharedSystemStage.value = stage
     // 仅核心网视图驱动拓扑动画
     if (activeView.value !== 'core-network') return
     if (stage === lastStage) return
     lastStage = stage
     const step = findStepByStage(stage)
     if (step) {
-      if (!baseSnap) snapshot()
       applyStep(step)
     } else {
       await applyDefaultStage()

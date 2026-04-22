@@ -1,15 +1,20 @@
 export interface MetricsSample {
   timestamp: number
   e2e_latency_ms: number
-  jitter_ms: number
-  compute_latency_ms: number
-  processing_latency_ms: number
+  fps: number
+}
+
+export interface MetricsAverage {
+  e2e_latency_ms: number
   fps: number
 }
 
 export interface MetricsHistoryResponse {
   status: string
   metrics: MetricsSample[]
+  ott_metrics?: MetricsSample[]
+  average?: MetricsAverage | null
+  ott_average?: MetricsAverage | null
 }
 
 export interface UseMetricsHistoryOptions {
@@ -22,6 +27,9 @@ export function useMetricsHistory(options: UseMetricsHistoryOptions = {}) {
   const pollIntervalMs = options.pollIntervalMs ?? 2000
 
   const samples = ref<MetricsSample[]>([])
+  const ottSamples = ref<MetricsSample[]>([])
+  const average = ref<MetricsAverage | null>(null)
+  const ottAverage = ref<MetricsAverage | null>(null)
   const isLoading = ref(false)
   const error = ref<Error | null>(null)
   const lastUpdated = ref<number | null>(null)
@@ -43,7 +51,13 @@ export function useMetricsHistory(options: UseMetricsHistoryOptions = {}) {
         )
       }
       const sorted = [...body.metrics].sort((a, b) => a.timestamp - b.timestamp)
+      const sortedOtt = Array.isArray(body.ott_metrics)
+        ? [...body.ott_metrics].sort((a, b) => a.timestamp - b.timestamp)
+        : []
       samples.value = sorted
+      ottSamples.value = sortedOtt
+      average.value = body.average ?? null
+      ottAverage.value = body.ott_average ?? null
       lastUpdated.value = Date.now()
       error.value = null
     } catch (e) {
@@ -89,6 +103,9 @@ export function useMetricsHistory(options: UseMetricsHistoryOptions = {}) {
 
   return {
     samples,
+    ottSamples,
+    average,
+    ottAverage,
     isLoading,
     error,
     lastUpdated,

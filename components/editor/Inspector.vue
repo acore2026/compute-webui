@@ -21,7 +21,7 @@
 
     <!-- 节点表单 -->
     <div v-else-if="selection.type === 'node'" class="p-3 space-y-4">
-      <div v-if="inPreview" class="preview-banner">
+      <div v-if="inStagePreview" class="preview-banner">
         <span class="status-badge status-badge-live" style="font-size: 0.58rem;">
           <span class="status-badge-icon"></span>
           PREVIEW Stage {{ previewIdx + 1 }}
@@ -105,7 +105,7 @@
         </select>
       </Field>
 
-      <template v-if="selection.node.type === 'mission'">
+      <template v-if="selection.node.type === 'mission' && inStagePreview">
         <Field label="消息气泡 (预览中写入当前 Stage)">
           <input
             class="settings-input"
@@ -144,7 +144,7 @@
         </div>
       </template>
 
-      <div v-if="selection.node.type === 'mission'" class="grid grid-cols-2 gap-2">
+      <div v-if="selection.node.type === 'mission' && inStagePreview" class="grid grid-cols-2 gap-2">
         <ToggleField
           label="静态激活"
           :value="!!selection.node.data.active"
@@ -158,7 +158,7 @@
       </div>
 
       <!-- Plan Checklist 编辑 -->
-      <div v-if="selection.node.type === 'mission'" class="region-section">
+      <div v-if="selection.node.type === 'mission' && inStagePreview" class="region-section">
         <div class="section-title">Plan 清单 (可选)</div>
         <template v-if="selection.node.data.plan">
           <Field label="标题">
@@ -271,6 +271,11 @@
             <option value="dots">点阵</option>
           </select>
         </Field>
+        <ToggleField
+          :label="inStagePreview ? '当前 Stage 显示' : 'Base Stage 显示'"
+          :value="!selection.node.hidden"
+          @update="patchData('hidden', !$event)"
+        />
       </div>
 
       <!-- 通用尺寸微调：任意节点类型都可手动调整 -->
@@ -317,7 +322,7 @@
     <!-- 边表单 -->
     <div v-else-if="selection.type === 'edge'" class="p-3 space-y-4">
       <!-- 预览模式提示 -->
-      <div v-if="inPreview" class="preview-banner">
+      <div v-if="inStagePreview" class="preview-banner">
         <span class="status-badge status-badge-live" style="font-size: 0.58rem;">
           <span class="status-badge-icon"></span>
           PREVIEW Stage {{ previewIdx + 1 }}
@@ -391,7 +396,7 @@
         </select>
       </Field>
 
-      <Field label="状态 (动画)">
+      <Field v-if="inStagePreview" label="状态 (动画)">
         <select
           class="settings-input"
           :value="selection.edge.data?.state || 'idle'"
@@ -403,7 +408,7 @@
         </select>
       </Field>
 
-      <Field label="流向">
+      <Field v-if="inStagePreview" label="流向">
         <select
           class="settings-input"
           :value="selection.edge.data?.direction || 'forward'"
@@ -416,6 +421,7 @@
       </Field>
 
       <ToggleField
+        v-if="inStagePreview"
         label="流光滑段"
         :value="!!selection.edge.data?.glow"
         @update="patchEdge('glow', $event)"
@@ -429,7 +435,7 @@
         />
       </Field>
 
-      <Field label="强制色 tone (激活时可选)">
+      <Field v-if="inStagePreview" label="强制色 tone (激活时可选)">
         <input
           type="color"
           class="settings-input"
@@ -510,7 +516,7 @@ const props = defineProps<{
   selection: Selection | null
   previewIdx?: number | null
 }>()
-const inPreview = computed(() =>
+const inStagePreview = computed(() =>
   props.previewIdx !== null && props.previewIdx !== undefined && props.previewIdx >= 0
 )
 const emit = defineEmits<{
