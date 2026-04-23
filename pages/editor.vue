@@ -695,7 +695,7 @@ function addImage() {
     zIndex: 10,
     data: {
       label: '机器狗',
-      src: '',
+      src: '/assets/unitree-robotdog.png',
       handles: [
         'in-top', 'out-top', 'in-bottom', 'out-bottom',
         'in-left', 'out-left', 'in-right', 'out-right'

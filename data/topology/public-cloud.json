@@ -487,7 +487,7 @@
         "zIndex": 10,
         "data": {
           "label": "机器狗",
-          "src": "/assets/uploads/899c4d71.png",
+          "src": "/assets/unitree-robotdog.png",
           "handles": [
             "in-top",
             "out-top",
