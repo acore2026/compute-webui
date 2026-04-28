@@ -73,6 +73,13 @@ export function usePassiveVideoPeer(options: PassiveVideoPeerOptions) {
   }
 
   async function connectOnce(): Promise<void> {
+    if (window.isSecureContext && navigator.mediaDevices?.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+        stream.getTracks().forEach((track) => track.stop())
+      } catch {
+      }
+    }
     const currentPc = new RTCPeerConnection(buildPassiveVideoRtcConfiguration())
     pc = currentPc
 
